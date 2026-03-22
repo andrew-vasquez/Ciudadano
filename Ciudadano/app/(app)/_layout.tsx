@@ -27,6 +27,7 @@ export default function AppLayout() {
       }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="incidents/[id]" options={{ title: copy.nav.stack.incident }} />
+      <Stack.Screen name="report-alert" options={{ headerShown: false, presentation: 'modal' }} />
       <Stack.Screen name="sos" options={{ title: copy.nav.stack.sos, presentation: 'modal' }} />
     </Stack>
   );

@@ -9,14 +9,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { LoadingScreen } from '@/components/ui/loading-screen';
 import { BouncyPressable } from '@/components/ui/bouncy-pressable';
-import { StatusPill } from '@/components/ui/status-pill';
 import { alertsRepository, homeRepository } from '@/lib/data/mock-repositories';
 import { useI18n } from '@/lib/i18n/language-provider';
 import type { HomeDashboard, Incident, MapRegion } from '@/lib/data/types';
 
 const isIOS = process.env.EXPO_OS === 'ios';
-const MAP_BOTTOM_SPACE = 94;
-const ACTION_ROW_HEIGHT = 72;
 const MAP_ACTION_SIZE = 50;
 const FILTERS = ['all', 'police', 'medical', 'fire'] as const;
 type FilterKey = (typeof FILTERS)[number];
@@ -44,11 +41,6 @@ function GlassPanel({ children, style }: { children: ReactNode; style?: StylePro
       {children}
     </View>
   );
-}
-
-function formatCoverage(label: string) {
-  const value = label.match(/[0-9.]+/)?.[0];
-  return value ? `${value} km` : label;
 }
 
 function getIncidentFilter(incident: Incident): Exclude<FilterKey, 'all'> {
@@ -90,7 +82,6 @@ export default function HomeScreen() {
   const { copy, language } = useI18n();
   const [dashboard, setDashboard] = useState<HomeDashboard | null>(null);
   const [incidents, setIncidents] = useState<Incident[] | null>(null);
-  const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterKey>('all');
   const [hasLocationPermission, setHasLocationPermission] = useState(false);
@@ -167,7 +158,6 @@ export default function HomeScreen() {
 
       setDashboard(nextDashboard);
       setIncidents(nextIncidents);
-      setSelectedIncidentId((current) => current ?? nextIncidents[0]?.id ?? null);
     }
 
     void load();
@@ -264,38 +254,7 @@ export default function HomeScreen() {
     });
   }, [activeFilter, incidents, searchQuery]);
 
-  useEffect(() => {
-    if (!filteredIncidents.length) {
-      setSelectedIncidentId(null);
-      return;
-    }
-
-    const currentStillVisible = filteredIncidents.some((incident) => incident.id === selectedIncidentId);
-
-    if (!currentStillVisible) {
-      setSelectedIncidentId(filteredIncidents[0]?.id ?? null);
-    }
-  }, [filteredIncidents, selectedIncidentId]);
-
-  const selectedIncident = useMemo(
-    () => filteredIncidents.find((incident) => incident.id === selectedIncidentId) ?? filteredIncidents[0] ?? null,
-    [filteredIncidents, selectedIncidentId]
-  );
   const showMapActions = hasLocationPermission && !!userCoordinate;
-
-  const focusIncident = (incident: Incident) => {
-    setSelectedIncidentId(incident.id);
-    setIsMapCenteredOnUser(false);
-    mapRef.current?.animateToRegion(
-      {
-        latitude: incident.latitude,
-        longitude: incident.longitude,
-        latitudeDelta: 0.02,
-        longitudeDelta: 0.02,
-      },
-      240
-    );
-  };
 
   if (!dashboard || !incidents) {
     return <LoadingScreen label={copy.home.loading} />;
@@ -315,17 +274,19 @@ export default function HomeScreen() {
 
           setIsMapCenteredOnUser(isRegionNearUser(region, userCoordinate));
         }}
+        pitchEnabled={false}
         rotateEnabled={false}
         showsCompass={false}
         showsMyLocationButton={false}
         showsPointsOfInterest={false}
         showsUserLocation={hasLocationPermission}
+        zoomEnabled
         style={StyleSheet.absoluteFillObject}>
         {filteredIncidents.map((incident) => (
           <Marker
             key={incident.id}
             coordinate={{ latitude: incident.latitude, longitude: incident.longitude }}
-            onPress={() => focusIncident(incident)}>
+            onPress={() => router.push(`/(app)/incidents/${incident.id}`)}>
             <View
               style={[
                 styles.marker,
@@ -406,86 +367,39 @@ export default function HomeScreen() {
           </GlassPanel>
         </View>
 
-        <View
-          style={[
-            styles.bottomSection,
-            {
-              bottom: MAP_BOTTOM_SPACE + insets.bottom,
-            },
-          ]}>
-          {selectedIncident ? (
-            <View style={styles.selectedAlertWrap}>
-              <GlassPanel>
-                <BouncyPressable
-                  accessibilityRole="button"
-                  onPress={() => router.push(`/(app)/incidents/${selectedIncident.id}`)}
-                  pressScale={0.988}
-                  style={styles.selectedPressable}>
-                  <View style={styles.selectedHeader}>
-                    <StatusPill label={copy.home.selectedAlert} tone={selectedIncident.tone} />
-                    <Text style={styles.selectedMeta}>{copy.common.minutesAgo(selectedIncident.minutesAgo)}</Text>
-                  </View>
-                  <Text style={styles.selectedTitle}>{selectedIncident.title}</Text>
-                  <Text numberOfLines={2} style={styles.selectedSummary}>
-                    {selectedIncident.summary}
-                  </Text>
-                </BouncyPressable>
-              </GlassPanel>
-            </View>
-          ) : null}
+        {showMapActions ? (
+          <View
+            pointerEvents="box-none"
+            style={[
+              styles.mapActionStack,
+              {
+                bottom: insets.bottom + 88,
+              },
+            ]}>
+            <GlassPanel style={[styles.mapActionButtonShell, isMapCenteredOnUser ? styles.mapActionButtonShellActive : null]}>
+              <BouncyPressable
+                accessibilityLabel={copy.home.actions.recenter}
+                accessibilityRole="button"
+                disabled={isLocatingUser}
+                onPress={() => {
+                  void recenterToUser();
+                }}
+                pressScale={0.93}
+                style={[styles.mapActionButton, isLocatingUser ? styles.mapActionButtonDisabled : null]}>
+                <MaterialIcons color="#FFFFFF" name="my-location" size={20} />
+              </BouncyPressable>
+            </GlassPanel>
 
-          <View style={styles.bottomLane}>
-            <View style={styles.bottomRow}>
-              <GlassPanel style={styles.bottomCardLeft}>
-                <Text style={styles.bottomValue}>{String(filteredIncidents.length).padStart(2, '0')}</Text>
-                <Text style={styles.bottomLabel}>{copy.home.nearbyIncidentsStat}</Text>
-              </GlassPanel>
-              <GlassPanel style={styles.bottomExplore}>
-                <BouncyPressable
-                  accessibilityRole="button"
-                  onPress={() => selectedIncident && router.push(`/(app)/incidents/${selectedIncident.id}`)}
-                  pressScale={0.975}
-                  style={styles.exploreButton}>
-                  <View style={styles.exploreRow}>
-                    <Text style={styles.exploreText}>{copy.home.explore}</Text>
-                    <MaterialIcons color="#111111" name="north-east" size={16} />
-                  </View>
-                </BouncyPressable>
-              </GlassPanel>
-              <GlassPanel style={styles.bottomCardRight}>
-                <Text style={styles.bottomValue}>{formatCoverage(dashboard.watchRadiusLabel)}</Text>
-                <Text style={styles.bottomLabel}>{copy.home.coverageStat}</Text>
-              </GlassPanel>
-            </View>
-
-            {showMapActions ? (
-              <View pointerEvents="box-none" style={styles.mapActionStack}>
-                <GlassPanel style={[styles.mapActionButtonShell, isMapCenteredOnUser ? styles.mapActionButtonShellActive : null]}>
-                  <BouncyPressable
-                    accessibilityLabel={copy.home.actions.recenter}
-                    accessibilityRole="button"
-                    disabled={isLocatingUser}
-                    onPress={() => {
-                      void recenterToUser();
-                    }}
-                    pressScale={0.93}
-                    style={[styles.mapActionButton, isLocatingUser ? styles.mapActionButtonDisabled : null]}>
-                    <MaterialIcons color="#FFFFFF" name="my-location" size={20} />
-                  </BouncyPressable>
-                </GlassPanel>
-
-                <BouncyPressable
-                  accessibilityLabel={copy.home.actions.createAlert}
-                  accessibilityRole="button"
-                  onPress={() => router.navigate('/(app)/(tabs)/post')}
-                  pressScale={0.94}
-                  style={styles.fab}>
-                  <MaterialIcons color="#FFFFFF" name="add-alert" size={22} />
-                </BouncyPressable>
-              </View>
-            ) : null}
+            <BouncyPressable
+              accessibilityLabel={copy.home.actions.createAlert}
+              accessibilityRole="button"
+              onPress={() => router.push('/(app)/report-alert')}
+              pressScale={0.94}
+              style={styles.fab}>
+              <MaterialIcons color="#FFFFFF" name="add-alert" size={22} />
+            </BouncyPressable>
           </View>
-        </View>
+        ) : null}
       </View>
     </View>
   );
@@ -520,22 +434,25 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.03)',
   },
   searchShell: {
-    minHeight: 50,
+    minHeight: 48,
     paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingVertical: 6,
   },
   searchRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+    minHeight: 34,
   },
   searchInput: {
     flex: 1,
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '500',
-    lineHeight: 18,
-    paddingVertical: 0,
+    lineHeight: 20,
+    paddingTop: 0,
+    paddingBottom: 0,
+    textAlignVertical: 'center',
   },
   filterShell: {
     paddingVertical: 4,
@@ -618,41 +535,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  selectedAlertWrap: {
-    marginBottom: 12,
-    width: '100%',
-    zIndex: 2,
-  },
-  selectedPressable: {
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-  },
-  selectedHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-    marginBottom: 10,
-  },
-  selectedMeta: {
-    color: '#AAB3C2',
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-  },
-  selectedTitle: {
-    color: '#FFFFFF',
-    fontSize: 17,
-    fontWeight: '800',
-    letterSpacing: -0.5,
-  },
-  selectedSummary: {
-    color: '#C4CCD8',
-    fontSize: 13,
-    lineHeight: 18,
-    marginTop: 6,
-  },
   fab: {
     width: 50,
     height: 50,
@@ -665,6 +547,8 @@ const styles = StyleSheet.create({
     boxShadow: '0 18px 36px rgba(37, 99, 235, 0.32)',
   },
   mapActionStack: {
+    position: 'absolute',
+    right: 18,
     gap: 8,
     alignItems: 'center',
     justifyContent: 'flex-end',
@@ -684,79 +568,5 @@ const styles = StyleSheet.create({
   },
   mapActionButtonDisabled: {
     opacity: 0.65,
-  },
-  bottomSection: {
-    position: 'absolute',
-    left: 18,
-    right: 18,
-  },
-  bottomLane: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: 8,
-    zIndex: 1,
-  },
-  bottomRow: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 8,
-  },
-  bottomCardLeft: {
-    width: 82,
-    minHeight: ACTION_ROW_HEIGHT,
-    justifyContent: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 10,
-  },
-  bottomExplore: {
-    flex: 1,
-    minHeight: 66,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 8,
-    borderRadius: 999,
-  },
-  bottomCardRight: {
-    width: 90,
-    minHeight: ACTION_ROW_HEIGHT,
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 10,
-  },
-  bottomValue: {
-    color: '#FFFFFF',
-    fontSize: 20,
-    fontWeight: '400',
-    letterSpacing: -0.6,
-    fontVariant: ['tabular-nums'],
-  },
-  bottomLabel: {
-    color: '#C2CAD5',
-    fontSize: 11,
-    lineHeight: 15,
-    marginTop: 3,
-  },
-  exploreButton: {
-    width: '100%',
-  },
-  exploreRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    borderRadius: 999,
-    backgroundColor: '#FFFFFF',
-    minHeight: 42,
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-  },
-  exploreText: {
-    color: '#111111',
-    fontSize: 12,
-    fontWeight: '700',
   },
 });

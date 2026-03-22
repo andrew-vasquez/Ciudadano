@@ -33,7 +33,7 @@ export function InputField({
         autoCapitalize={autoCapitalize}
         keyboardType={keyboardType}
         className="rounded-[18px] border border-zinc-800 bg-zinc-950/88 px-4 text-base text-white"
-        style={{ minHeight: 52 }}
+        style={{ minHeight: 52, lineHeight: 20, paddingTop: 0, paddingBottom: 0, textAlignVertical: 'center' }}
       />
       {helperText ? <Text className="text-xs leading-5 text-zinc-400">{helperText}</Text> : null}
     </View>

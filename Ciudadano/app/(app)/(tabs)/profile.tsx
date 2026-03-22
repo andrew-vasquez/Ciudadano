@@ -37,11 +37,11 @@ export default function ProfileScreen() {
       title={profile.name}
       description={profile.bio}
       headerAccessory={<StatusPill label={profile.badge} tone="info" />}>
-      <AppCard className="gap-5">
+      <AppCard className="gap-4.5">
         <View className="flex-row items-center gap-4">
-          <Image source={{ uri: profile.avatarUrl }} style={{ width: 92, height: 92, borderRadius: 999 }} />
-          <View className="flex-1 gap-1">
-            <Text className="text-xl font-semibold text-white">{profile.district}</Text>
+          <Image source={{ uri: profile.avatarUrl }} style={{ width: 88, height: 88, borderRadius: 999 }} />
+          <View className="flex-1 gap-1.5">
+            <Text className="text-[22px] font-semibold tracking-tight text-white">{profile.district}</Text>
             <Text className="text-sm leading-6 text-zinc-400">{copy.profile.memberSince}</Text>
             <Text className="text-sm leading-6 text-zinc-400">{copy.profile.profileReady}</Text>
           </View>
@@ -72,13 +72,13 @@ export default function ProfileScreen() {
       </View>
 
       <View className="gap-3">
-        <Text className="text-xl font-bold tracking-tight text-white">{copy.profile.recentActivity}</Text>
+        <Text className="text-[22px] font-bold tracking-tight text-white">{copy.profile.recentActivity}</Text>
         {profile.activity.map((item) => (
           <AppCard key={item.id} className="gap-3">
             <View className="flex-row items-start justify-between gap-4">
               <View className="flex-1 gap-2">
-                <View className={`self-start rounded-full px-3 py-1 ${activityToneClass[item.tone]}`}>
-                  <Text className="text-[11px] font-semibold uppercase tracking-[1.5px]">{item.minutesAgoLabel}</Text>
+                <View className={`self-start rounded-full px-3 py-1.5 ${activityToneClass[item.tone]}`}>
+                  <Text className="text-[10px] font-semibold uppercase tracking-[1.3px]">{item.minutesAgoLabel}</Text>
                 </View>
                 <Text className="text-lg font-semibold text-white">{item.title}</Text>
                 <Text className="text-sm leading-6 text-zinc-400">{item.description}</Text>
@@ -89,7 +89,7 @@ export default function ProfileScreen() {
       </View>
 
       <View className="gap-3">
-        <Text className="text-xl font-bold tracking-tight text-white">{copy.profile.monitoringZones}</Text>
+        <Text className="text-[22px] font-bold tracking-tight text-white">{copy.profile.monitoringZones}</Text>
         {profile.monitoringZones.map((zone) => (
           <ListRow
             key={zone.id}

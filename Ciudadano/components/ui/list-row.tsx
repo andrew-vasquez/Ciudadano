@@ -17,15 +17,15 @@ export function ListRow({ icon, title, subtitle, trailing, onPress }: ListRowPro
       accessibilityRole={onPress ? 'button' : undefined}
       onPress={onPress}
       pressScale={0.985}
-      className="min-h-16 flex-row items-center gap-4 rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-4">
-      <View className="h-11 w-11 items-center justify-center rounded-2xl bg-zinc-900">
+      className="min-h-[72px] flex-row items-start gap-4 rounded-[22px] border border-zinc-800/95 bg-zinc-950 px-4 py-3.5">
+      <View className="h-10 w-10 items-center justify-center rounded-[18px] bg-zinc-900">
         <MaterialIcons color="#60a5fa" name={icon} size={22} />
       </View>
-      <View className="flex-1 gap-1">
+      <View className="flex-1 gap-1 pt-0.5">
         <Text className="text-base font-semibold text-zinc-100">{title}</Text>
         <Text className="text-sm leading-5 text-zinc-400">{subtitle}</Text>
       </View>
-      {trailing ? <Text className="text-xs font-semibold uppercase tracking-wide text-zinc-400">{trailing}</Text> : null}
+      {trailing ? <Text className="pt-1 text-xs font-semibold uppercase tracking-wide text-zinc-400">{trailing}</Text> : null}
     </BouncyPressable>
   );
 }

@@ -132,10 +132,12 @@ type AppCopy = {
     notFoundDescription: string;
     verifiedAlert: string;
     confirmedBy: (count: number) => string;
+    inThisArea: string;
+    areaDescription: string;
     actions: {
       update: string;
       navigate: string;
-      safeList: string;
+      follow: string;
       emergency: string;
     };
     communityTimeline: string;
@@ -151,6 +153,17 @@ type AppCopy = {
     eyebrow: string;
     title: string;
     description: string;
+    nearbyUsers: (count: number) => string;
+    whatsHappeningTitle: string;
+    whatsHappeningDescription: string;
+    required: string;
+    characterMinimum: string;
+    incidentLocationTitle: string;
+    locationFallback: string;
+    adjustPinHint: string;
+    next: string;
+    categoryStepTitle: string;
+    categoryStepDescription: string;
     headlineLabel: string;
     headlinePlaceholder: string;
     detailsLabel: string;
@@ -358,10 +371,12 @@ export const translations: Record<Language, AppCopy> = {
       notFoundDescription: 'This record does not exist or is no longer available in the current demo.',
       verifiedAlert: 'Verified alert',
       confirmedBy: (count) => `Confirmed by ${count} community members.`,
+      inThisArea: 'In this area',
+      areaDescription: 'Nearby incidents reported around this location.',
       actions: {
         update: 'Update',
         navigate: 'Navigate',
-        safeList: 'Safe list',
+        follow: 'Follow',
         emergency: 'Emergency',
       },
       communityTimeline: 'Community timeline',
@@ -375,9 +390,20 @@ export const translations: Record<Language, AppCopy> = {
     post: {
       loading: 'Preparing reporting flow...',
       eyebrow: 'New report',
-      title: 'Publish a clear alert',
+      title: 'Submit incident',
       description:
-        'Share useful context so your neighborhood can see what is happening, where it is happening, and what level of response is needed.',
+        'Share useful context so nearby residents can understand what is happening, where it is happening, and how urgent it feels.',
+      nearbyUsers: (count) => `${count} Ciudadano users nearby`,
+      whatsHappeningTitle: "What's happening",
+      whatsHappeningDescription: 'Please write a detailed description. Reports with more context have a higher chance of being trusted.',
+      required: 'Required',
+      characterMinimum: '15 character minimum',
+      incidentLocationTitle: 'Incident location',
+      locationFallback: 'Current location',
+      adjustPinHint: 'Move the map or drag the pin to make the location more accurate.',
+      next: 'Next',
+      categoryStepTitle: 'Choose report type',
+      categoryStepDescription: 'Pick the category that best matches what you are seeing, then review the alert before publishing.',
       headlineLabel: 'Headline',
       headlinePlaceholder: 'Summarize the incident',
       detailsLabel: 'Details',
@@ -732,15 +758,28 @@ export const translations: Record<Language, AppCopy> = {
       notFoundDescription: 'Este registro no existe o ya no esta disponible en la demo actual.',
       verifiedAlert: 'Alerta verificada',
       confirmedBy: (count) => `Confirmada por ${count} miembros de la comunidad.`,
-      actions: { update: 'Actualizar', navigate: 'Navegar', safeList: 'Safe List', emergency: 'Emergencia' },
+      inThisArea: 'En esta zona',
+      areaDescription: 'Incidentes cercanos reportados alrededor de esta ubicacion.',
+      actions: { update: 'Actualizar', navigate: 'Navegar', follow: 'Seguir', emergency: 'Emergencia' },
       communityTimeline: 'Timeline comunitario',
       timelineLabels: { verified: 'Verificado', community: 'Comunidad', location: 'Ubicacion', reply: 'Responder' },
     },
     post: {
       loading: 'Preparando el flujo de reporte...',
       eyebrow: 'Nuevo reporte',
-      title: 'Publica una alerta clara',
-      description: 'Comparte contexto util para que tu colonia vea que sucede, donde ocurre y que nivel de respuesta hace falta.',
+      title: 'Enviar incidente',
+      description: 'Comparte contexto util para que las personas cercanas entiendan que sucede, donde ocurre y que tan urgente parece.',
+      nearbyUsers: (count) => `${count} usuarios de Ciudadano cerca`,
+      whatsHappeningTitle: 'Que esta pasando',
+      whatsHappeningDescription: 'Escribe una descripcion detallada. Los reportes con mas contexto tienen mas probabilidades de ser confiables.',
+      required: 'Obligatorio',
+      characterMinimum: 'Minimo 15 caracteres',
+      incidentLocationTitle: 'Ubicacion del incidente',
+      locationFallback: 'Ubicacion actual',
+      adjustPinHint: 'Mueve el mapa o arrastra el pin para precisar mejor la ubicacion.',
+      next: 'Siguiente',
+      categoryStepTitle: 'Elige el tipo de reporte',
+      categoryStepDescription: 'Selecciona la categoria que mejor describe lo que ves y despues revisa la alerta antes de enviarla.',
       headlineLabel: 'Titular',
       headlinePlaceholder: 'Resume el incidente',
       detailsLabel: 'Detalles',

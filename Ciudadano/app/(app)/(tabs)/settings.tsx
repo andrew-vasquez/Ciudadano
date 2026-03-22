@@ -38,9 +38,9 @@ export default function SettingsScreen() {
         ))}
       </View>
 
-      <AppCard className="gap-4">
-        <View className="flex-row items-center justify-between gap-4">
-          <View className="flex-1 gap-1">
+      <AppCard className="gap-3">
+        <View className="flex-row items-center justify-between gap-4 rounded-[20px] border border-zinc-800/80 bg-black/20 px-4 py-4">
+          <View className="flex-1 gap-1.5">
             <Text className="text-base font-semibold text-white">{copy.settings.biometricsTitle}</Text>
             <Text className="text-sm leading-6 text-zinc-400">{copy.settings.biometricsDescription}</Text>
           </View>
@@ -51,8 +51,8 @@ export default function SettingsScreen() {
             trackColor={{ false: '#27272A', true: '#172554' }}
           />
         </View>
-        <View className="flex-row items-center justify-between gap-4">
-          <View className="flex-1 gap-1">
+        <View className="flex-row items-center justify-between gap-4 rounded-[20px] border border-zinc-800/80 bg-black/20 px-4 py-4">
+          <View className="flex-1 gap-1.5">
             <Text className="text-base font-semibold text-white">{copy.settings.zoneDigestTitle}</Text>
             <Text className="text-sm leading-6 text-zinc-400">{copy.settings.zoneDigestDescription}</Text>
           </View>
@@ -66,7 +66,7 @@ export default function SettingsScreen() {
       </AppCard>
 
       <AppCard className="gap-4">
-        <View className="gap-1">
+        <View className="gap-1.5">
           <Text className="text-base font-semibold text-white">{copy.settings.languageTitle}</Text>
           <Text className="text-sm leading-6 text-zinc-400">{copy.settings.languageDescription}</Text>
         </View>
@@ -83,7 +83,7 @@ export default function SettingsScreen() {
                   void setLanguage(option);
                 }}
                 pressScale={0.985}
-                className={`flex-1 rounded-[18px] border px-4 py-3.5 ${
+                className={`min-h-12 flex-1 items-center justify-center rounded-[18px] border px-4 py-3 ${
                   selected ? 'border-blue-500 bg-blue-950/30' : 'border-zinc-800 bg-zinc-950/80'
                 }`}>
                 <Text className={`text-center text-sm font-semibold ${selected ? 'text-blue-200' : 'text-zinc-200'}`}>
@@ -95,7 +95,7 @@ export default function SettingsScreen() {
         </View>
       </AppCard>
 
-      <AppCard className="gap-4 border-rose-900 bg-rose-950/20">
+      <AppCard className="gap-3.5 border-rose-900 bg-rose-950/20">
         <Text className="text-lg font-semibold text-white">{copy.settings.leaveDemoTitle}</Text>
         <Text className="text-sm leading-6 text-zinc-300">{copy.settings.leaveDemoDescription}</Text>
         <AppButton label={copy.settings.signOut} onPress={signOut} variant="danger" />
