@@ -1,9 +1,11 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { BlurView } from 'expo-blur';
+import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
 import * as Haptics from 'expo-haptics';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { StyleSheet, View, type GestureResponderEvent } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   FadeInDown,
@@ -12,6 +14,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
+  withSequence,
 } from 'react-native-reanimated';
 
 type RouteName = 'index' | 'alerts' | 'post' | 'profile' | 'settings';
@@ -29,12 +32,27 @@ const BAR_HORIZONTAL_PADDING = 10;
 const BAR_HEIGHT = 74;
 const PILL_HEIGHT = 54;
 const PILL_INSET = 6;
-const LONG_PRESS_DELAY_MS = 140;
-const MAX_STRETCH_SCALE = 1.34;
-const SPRING_CONFIG = {
+const HOLD_DELAY_MS = 120;
+const MAX_STRETCH_SCALE = 1.52;
+const DRAG_SPRING_CONFIG = {
   damping: 15,
   stiffness: 230,
   mass: 0.72,
+} as const;
+const SNAP_SPRING_CONFIG = {
+  damping: 12,
+  stiffness: 260,
+  mass: 0.68,
+} as const;
+const RELEASE_PROGRESS_CONFIG = {
+  damping: 11,
+  stiffness: 240,
+  mass: 0.66,
+} as const;
+const TAP_PULSE_CONFIG = {
+  damping: 14,
+  stiffness: 250,
+  mass: 0.7,
 } as const;
 
 function clamp(value: number, min: number, max: number) {
@@ -135,10 +153,7 @@ export function LiquidTabBar({ state, descriptors, navigation }: BottomTabBarPro
   const insets = useSafeAreaInsets();
   const [layoutWidth, setLayoutWidth] = useState(0);
   const routeCount = state.routes.length;
-  const dragIndexRef = useRef(state.index);
-  const isDraggingRef = useRef(false);
-  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const touchXRef = useRef(0);
+  const glassSupported = isIOS && isLiquidGlassAvailable();
 
   const itemWidth = useMemo(() => {
     if (!layoutWidth) {
@@ -157,9 +172,8 @@ export function LiquidTabBar({ state, descriptors, navigation }: BottomTabBarPro
   const getTabCenterX = (index: number) => BAR_HORIZONTAL_PADDING + index * itemWidth + itemWidth / 2;
 
   const getIndexFromCenter = (centerX: number) => {
-    'worklet';
     if (!itemWidth) {
-      return state.index;
+      return dragIndex.value;
     }
 
     const firstCenter = BAR_HORIZONTAL_PADDING + itemWidth / 2;
@@ -169,80 +183,16 @@ export function LiquidTabBar({ state, descriptors, navigation }: BottomTabBarPro
 
   const lensCenterX = useSharedValue(0);
   const dragProgress = useSharedValue(0);
+  const dragIndex = useSharedValue(state.index);
 
-  const clearLongPressTimer = () => {
-    if (!longPressTimerRef.current) {
-      return;
-    }
-
-    clearTimeout(longPressTimerRef.current);
-    longPressTimerRef.current = null;
-  };
-
-  const beginDrag = (touchX: number) => {
+  useEffect(() => {
     if (!itemWidth) {
       return;
     }
 
-    isDraggingRef.current = true;
-
-    const minCenter = getTabCenterX(0);
-    const maxCenter = getTabCenterX(routeCount - 1);
-    const nextCenter = clamp(touchX, minCenter, maxCenter);
-    const nextIndex = getIndexFromCenter(nextCenter);
-
-    dragIndexRef.current = nextIndex;
-    dragProgress.value = withSpring(1, SPRING_CONFIG);
-    lensCenterX.value = withSpring(nextCenter, SPRING_CONFIG);
-    triggerMediumHaptic();
-  };
-
-  const updateDrag = (touchX: number) => {
-    if (!itemWidth || !isDraggingRef.current) {
-      return;
-    }
-
-    const minCenter = getTabCenterX(0);
-    const maxCenter = getTabCenterX(routeCount - 1);
-    const nextCenter = clamp(touchX, minCenter, maxCenter);
-    const nextIndex = getIndexFromCenter(nextCenter);
-
-    if (nextIndex !== dragIndexRef.current) {
-      dragIndexRef.current = nextIndex;
-      triggerLightHaptic();
-    }
-
-    lensCenterX.value = nextCenter;
-  };
-
-  const endDrag = () => {
-    clearLongPressTimer();
-
-    if (!itemWidth || !isDraggingRef.current) {
-      return;
-    }
-
-    const nextIndex = dragIndexRef.current;
-    isDraggingRef.current = false;
-    dragProgress.value = withSpring(0, SPRING_CONFIG);
-    lensCenterX.value = withSpring(getTabCenterX(nextIndex), SPRING_CONFIG);
-    navigateToIndex(nextIndex);
-  };
-
-  useEffect(() => {
-    if (!itemWidth || isDraggingRef.current) {
-      return;
-    }
-
-    dragIndexRef.current = state.index;
-    lensCenterX.value = withSpring(basePillCenter, SPRING_CONFIG);
-  }, [basePillCenter, itemWidth, lensCenterX, state.index]);
-
-  useEffect(() => {
-    return () => {
-      clearLongPressTimer();
-    };
-  }, []);
+    dragIndex.value = state.index;
+    lensCenterX.value = withSpring(basePillCenter, SNAP_SPRING_CONFIG);
+  }, [basePillCenter, dragIndex, itemWidth, lensCenterX, state.index]);
 
   const navigateToIndex = (index: number) => {
     const route = state.routes[index];
@@ -257,53 +207,78 @@ export function LiquidTabBar({ state, descriptors, navigation }: BottomTabBarPro
     }
   };
 
-  const handleTap = (touchX: number) => {
+  const updateLensForTouch = (touchX: number, triggerHaptic: boolean) => {
     if (!itemWidth) {
       return;
     }
 
-    const tappedIndex = getIndexFromCenter(touchX);
-    triggerLightHaptic();
-    dragIndexRef.current = tappedIndex;
-    lensCenterX.value = withSpring(getTabCenterX(tappedIndex), SPRING_CONFIG);
-    navigateToIndex(tappedIndex);
-  };
+    const minCenter = getTabCenterX(0);
+    const maxCenter = getTabCenterX(routeCount - 1);
+    const nextCenter = clamp(touchX, minCenter, maxCenter);
+    const nextIndex = getIndexFromCenter(nextCenter);
 
-  const handleTouchStart = (event: GestureResponderEvent) => {
-    clearLongPressTimer();
-
-    touchXRef.current = event.nativeEvent.locationX;
-    longPressTimerRef.current = setTimeout(() => {
-      beginDrag(touchXRef.current);
-    }, LONG_PRESS_DELAY_MS);
-  };
-
-  const handleTouchMove = (event: GestureResponderEvent) => {
-    touchXRef.current = event.nativeEvent.locationX;
-    updateDrag(touchXRef.current);
-  };
-
-  const handleTouchEnd = () => {
-    if (isDraggingRef.current) {
-      endDrag();
-      return;
+    if (nextIndex !== dragIndex.value) {
+      dragIndex.value = nextIndex;
+      if (triggerHaptic) {
+        triggerLightHaptic();
+      }
     }
 
-    clearLongPressTimer();
-    handleTap(touchXRef.current);
+    lensCenterX.value = nextCenter;
   };
 
-  const handleTouchCancel = () => {
-    clearLongPressTimer();
-
-    if (!isDraggingRef.current) {
-      return;
-    }
-
-    isDraggingRef.current = false;
-    dragProgress.value = withSpring(0, SPRING_CONFIG);
-    lensCenterX.value = withSpring(getTabCenterX(state.index), SPRING_CONFIG);
+  const triggerTapPulse = () => {
+    dragProgress.value = withSequence(
+      withSpring(0.36, TAP_PULSE_CONFIG),
+      withSpring(0, RELEASE_PROGRESS_CONFIG)
+    );
   };
+
+  const tapGesture = Gesture.Tap()
+    .runOnJS(true)
+    .maxDuration(220)
+    .onEnd((event, success) => {
+      if (!success || !itemWidth) {
+        return;
+      }
+
+      const tappedIndex = getIndexFromCenter(event.x);
+      dragIndex.value = tappedIndex;
+      lensCenterX.value = withSpring(getTabCenterX(tappedIndex), SNAP_SPRING_CONFIG);
+      triggerTapPulse();
+      triggerLightHaptic();
+      navigateToIndex(tappedIndex);
+    });
+
+  const panGesture = Gesture.Pan()
+    .runOnJS(true)
+    .activateAfterLongPress(HOLD_DELAY_MS)
+    .minDistance(0)
+    .maxPointers(1)
+    .onBegin((event) => {
+      if (!itemWidth) {
+        return;
+      }
+
+      dragProgress.value = withSpring(1, DRAG_SPRING_CONFIG);
+      updateLensForTouch(event.x, false);
+      triggerMediumHaptic();
+    })
+    .onUpdate((event) => {
+      updateLensForTouch(event.x, true);
+    })
+    .onFinalize(() => {
+      if (!itemWidth) {
+        return;
+      }
+
+      const nextIndex = dragIndex.value;
+      dragProgress.value = withSpring(0, RELEASE_PROGRESS_CONFIG);
+      lensCenterX.value = withSpring(getTabCenterX(nextIndex), SNAP_SPRING_CONFIG);
+      navigateToIndex(nextIndex);
+    });
+
+  const gesture = Gesture.Race(panGesture, tapGesture);
 
   const pillStyle = useAnimatedStyle(() => ({
     width: pillWidth,
@@ -321,7 +296,7 @@ export function LiquidTabBar({ state, descriptors, navigation }: BottomTabBarPro
         scaleY: interpolate(
           getStretchProgress(lensCenterX.value, itemWidth) * dragProgress.value,
           [0, 1],
-          [1, 0.95]
+          [1, 0.92]
         ),
       },
     ],
@@ -345,6 +320,33 @@ export function LiquidTabBar({ state, descriptors, navigation }: BottomTabBarPro
     };
   });
 
+  const haloStyle = useAnimatedStyle(() => {
+    const stretch = getStretchProgress(lensCenterX.value, itemWidth) * dragProgress.value;
+
+    return {
+      opacity: interpolate(dragProgress.value, [0, 0.36, 1], [0.92, 1, 1]),
+      transform: [{ scale: interpolate(stretch, [0, 1], [1, 1.015]) }],
+    };
+  });
+
+  const tintStyle = useAnimatedStyle(() => {
+    const stretch = getStretchProgress(lensCenterX.value, itemWidth) * dragProgress.value;
+
+    return {
+      opacity: interpolate(dragProgress.value, [0, 0.36, 1], [0.94, 1, 1]),
+      transform: [{ scale: interpolate(stretch, [0, 1], [1, 1.01]) }],
+    };
+  });
+
+  const shineStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(dragProgress.value, [0, 0.36, 1], [isIOS ? 0.82 : 0.42, isIOS ? 0.94 : 0.54, 1]),
+    transform: [{ scaleX: interpolate(dragProgress.value, [0, 1], [1, 1.06]) }],
+  }));
+
+  const innerShadowStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(dragProgress.value, [0, 0.36, 1], [0.9, 0.82, 0.72]),
+  }));
+
   return (
     <Animated.View
       entering={FadeInDown.duration(220).springify().damping(18).stiffness(160)}
@@ -355,60 +357,62 @@ export function LiquidTabBar({ state, descriptors, navigation }: BottomTabBarPro
           bottom: Math.max(insets.bottom, 8),
         },
       ]}>
-      <View
-        onLayout={(event) => {
-          const width = event.nativeEvent.layout.width;
-          setLayoutWidth((current) => (current === width ? current : width));
-        }}
-        onTouchCancel={handleTouchCancel}
-        onTouchEnd={handleTouchEnd}
-        onTouchMove={handleTouchMove}
-        onTouchStart={handleTouchStart}
-        style={styles.shell}>
-        <View style={styles.clip}>
-          {isIOS ? (
-            <BlurView intensity={100} tint="systemChromeMaterialDark" style={StyleSheet.absoluteFillObject} />
-          ) : (
-            <View style={[StyleSheet.absoluteFillObject, styles.androidShell]} />
-          )}
-          <View style={styles.chrome} />
-          <View style={styles.edgeHighlight} />
+      <GestureDetector gesture={gesture}>
+        <View
+          onLayout={(event) => {
+            const width = event.nativeEvent.layout.width;
+            setLayoutWidth((current) => (current === width ? current : width));
+          }}
+          style={styles.shell}>
+          <View style={styles.clip}>
+            {glassSupported ? (
+              <GlassView isInteractive style={StyleSheet.absoluteFillObject} />
+            ) : isIOS ? (
+              <BlurView intensity={100} tint="systemChromeMaterialDark" style={StyleSheet.absoluteFillObject} />
+            ) : (
+              <View style={[StyleSheet.absoluteFillObject, styles.androidShell]} />
+            )}
+            <View style={styles.chrome} />
+            <View style={styles.edgeHighlight} />
 
-          {itemWidth ? (
-            <Animated.View style={[styles.activePillWrap, pillStyle]}>
-              <View style={styles.activeHalo} />
-              <Animated.View style={[styles.chromaticFringeLeft, chromaLeftStyle]} />
-              <Animated.View style={[styles.chromaticFringeRight, chromaRightStyle]} />
-              <View style={styles.activeTint} />
-              <View style={styles.activePill} />
-              <View style={styles.activeShine} />
-              <View style={styles.activeInnerShadow} />
-            </Animated.View>
-          ) : null}
+            {itemWidth ? (
+              <Animated.View style={[styles.activePillWrap, pillStyle]}>
+                <Animated.View style={[styles.activeHalo, haloStyle]} />
+                <Animated.View style={[styles.chromaticFringeLeft, chromaLeftStyle]} />
+                <Animated.View style={[styles.chromaticFringeRight, chromaRightStyle]} />
+                <View style={styles.activeClip}>
+                  <Animated.View style={[styles.activeTint, tintStyle]} />
+                  <View style={styles.activePill} />
+                  <Animated.View style={[styles.activeShine, shineStyle]} />
+                  <Animated.View style={[styles.activeInnerShadow, innerShadowStyle]} />
+                </View>
+              </Animated.View>
+            ) : null}
 
-          <View style={styles.row}>
-            {state.routes.map((route, index) => {
-              const descriptor = descriptors[route.key];
-              const routeName = route.name as RouteName;
-              const accessibilityLabel =
-                descriptor.options.tabBarAccessibilityLabel ??
-                (typeof descriptor.options.title === 'string' ? descriptor.options.title : route.name);
+            <View style={styles.row}>
+              {state.routes.map((route, index) => {
+                const descriptor = descriptors[route.key];
+                const routeName = route.name as RouteName;
+                const accessibilityLabel =
+                  descriptor.options.tabBarAccessibilityLabel ??
+                  (typeof descriptor.options.title === 'string' ? descriptor.options.title : route.name);
 
-              return (
-                <TabIcon
-                  key={route.key}
-                  accessibilityLabel={accessibilityLabel}
-                  centerX={getTabCenterX(index)}
-                  dragProgress={dragProgress}
-                  icon={ICONS[routeName]}
-                  itemWidth={itemWidth}
-                  lensCenterX={lensCenterX}
-                />
-              );
-            })}
+                return (
+                  <TabIcon
+                    key={route.key}
+                    accessibilityLabel={accessibilityLabel}
+                    centerX={getTabCenterX(index)}
+                    dragProgress={dragProgress}
+                    icon={ICONS[routeName]}
+                    itemWidth={itemWidth}
+                    lensCenterX={lensCenterX}
+                  />
+                );
+              })}
+            </View>
           </View>
         </View>
-      </View>
+      </GestureDetector>
     </Animated.View>
   );
 }
@@ -457,6 +461,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: isIOS ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.10)',
     boxShadow: isIOS ? '0 0 18px rgba(140, 208, 255, 0.16)' : '0 8px 16px rgba(0,0,0,0.2)',
+  },
+  activeClip: {
+    flex: 1,
+    borderRadius: 999,
+    overflow: 'hidden',
   },
   chromaticFringeLeft: {
     ...StyleSheet.absoluteFillObject,
