@@ -378,7 +378,7 @@ export default function HomeScreen() {
                 <MaterialIcons color="#FFFFFF" name="layers" size={16} />
                 <Text style={styles.filterChipPrimaryText}>{copy.home.filters.all}</Text>
               </Pressable>
-              <Pressable style={styles.filterChip}>
+              <Pressable style={[styles.filterChip, styles.filterChipWithIcon]}>
                 <MaterialIcons color="#FFFFFF" name="schedule" size={16} />
                 <Text style={styles.filterChipText}>{copy.home.filters.timeframe}</Text>
               </Pressable>
@@ -443,7 +443,7 @@ export default function HomeScreen() {
               <GlassPanel style={styles.bottomExplore}>
                 <BouncyPressable
                   accessibilityRole="button"
-                  onPress={() => selectedIncident && focusIncident(selectedIncident)}
+                  onPress={() => selectedIncident && router.push(`/(app)/incidents/${selectedIncident.id}`)}
                   pressScale={0.975}
                   style={styles.exploreButton}>
                   <View style={styles.exploreRow}>
@@ -466,7 +466,7 @@ export default function HomeScreen() {
                     accessibilityRole="button"
                     disabled={isLocatingUser}
                     onPress={() => {
-                      void recenterToUser({ forceRefresh: true });
+                      void recenterToUser();
                     }}
                     pressScale={0.93}
                     style={[styles.mapActionButton, isLocatingUser ? styles.mapActionButtonDisabled : null]}>
@@ -520,9 +520,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.03)',
   },
   searchShell: {
-    minHeight: 52,
+    minHeight: 50,
     paddingHorizontal: 14,
-    paddingVertical: 10,
+    paddingVertical: 8,
   },
   searchRow: {
     flexDirection: 'row',
@@ -534,9 +534,11 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '500',
+    lineHeight: 18,
+    paddingVertical: 0,
   },
   filterShell: {
-    paddingVertical: 5,
+    paddingVertical: 4,
   },
   filterScroll: {
     gap: 6,
@@ -563,6 +565,7 @@ const styles = StyleSheet.create({
   },
   filterChip: {
     minHeight: 36,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 18,
@@ -570,6 +573,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.06)',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
+  },
+  filterChipWithIcon: {
+    gap: 6,
+    paddingHorizontal: 14,
   },
   filterChipSelected: {
     backgroundColor: 'rgba(255,255,255,0.18)',
@@ -613,6 +620,8 @@ const styles = StyleSheet.create({
   },
   selectedAlertWrap: {
     marginBottom: 12,
+    width: '100%',
+    zIndex: 2,
   },
   selectedPressable: {
     paddingHorizontal: 16,
@@ -685,6 +694,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     gap: 8,
+    zIndex: 1,
   },
   bottomRow: {
     flex: 1,

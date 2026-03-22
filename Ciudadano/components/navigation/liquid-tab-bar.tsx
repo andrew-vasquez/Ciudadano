@@ -7,6 +7,8 @@ import { StyleSheet, View, type GestureResponderEvent } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   FadeInDown,
+  interpolate,
+  type SharedValue,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
@@ -28,10 +30,11 @@ const BAR_HEIGHT = 74;
 const PILL_HEIGHT = 54;
 const PILL_INSET = 6;
 const LONG_PRESS_DELAY_MS = 140;
+const MAX_STRETCH_SCALE = 1.34;
 const SPRING_CONFIG = {
-  damping: 16,
-  stiffness: 210,
-  mass: 0.78,
+  damping: 15,
+  stiffness: 230,
+  mass: 0.72,
 } as const;
 
 function clamp(value: number, min: number, max: number) {
@@ -51,32 +54,86 @@ function triggerMediumHaptic() {
   }
 }
 
+function getStretchProgress(centerX: number, itemWidth: number) {
+  'worklet';
+
+  if (!itemWidth) {
+    return 0;
+  }
+
+  const relative = centerX - BAR_HORIZONTAL_PADDING - itemWidth / 2;
+  const nearestIndex = Math.round(relative / itemWidth);
+  const nearestCenter = BAR_HORIZONTAL_PADDING + itemWidth / 2 + nearestIndex * itemWidth;
+  const distance = Math.abs(centerX - nearestCenter);
+  const midpoint = itemWidth / 2;
+
+  return clamp(distance / midpoint, 0, 1);
+}
+
 function TabIcon({
   accessibilityLabel,
+  centerX,
+  dragProgress,
   icon,
-  isFocused,
   itemWidth,
+  lensCenterX,
 }: {
   accessibilityLabel: string;
+  centerX: number;
+  dragProgress: SharedValue<number>;
   icon: keyof typeof MaterialIcons.glyphMap;
-  isFocused: boolean;
   itemWidth: number;
+  lensCenterX: SharedValue<number>;
 }) {
+  const animatedStyle = useAnimatedStyle(() => {
+    const distance = Math.abs(lensCenterX.value - centerX);
+    const focusStrength = itemWidth ? 1 - clamp(distance / itemWidth, 0, 1) : 0;
+    const dragLift = dragProgress.value * 0.02;
+
+    return {
+      transform: [{ scale: 0.94 + focusStrength * 0.18 + dragLift }],
+      opacity: 0.58 + focusStrength * 0.42,
+    };
+  });
+
+  const activeIconStyle = useAnimatedStyle(() => {
+    const distance = Math.abs(lensCenterX.value - centerX);
+    const focusStrength = itemWidth ? 1 - clamp(distance / itemWidth, 0, 1) : 0;
+
+    return {
+      opacity: focusStrength,
+    };
+  });
+
+  const inactiveIconStyle = useAnimatedStyle(() => {
+    const distance = Math.abs(lensCenterX.value - centerX);
+    const focusStrength = itemWidth ? 1 - clamp(distance / itemWidth, 0, 1) : 0;
+
+    return {
+      opacity: 1 - focusStrength,
+    };
+  });
+
   return (
-    <View
+    <Animated.View
       accessibilityLabel={accessibilityLabel}
       accessibilityRole="tab"
-      accessibilityState={{ selected: isFocused }}
-      style={[styles.tabButton, { width: itemWidth }]}>
-      <MaterialIcons color={isFocused ? '#FFFFFF' : '#C4CBD7'} name={icon} size={23} />
-    </View>
+      style={[styles.tabButton, { width: itemWidth }, animatedStyle]}>
+      <View style={styles.iconStack}>
+        <Animated.View style={[styles.iconLayer, inactiveIconStyle]}>
+          <MaterialIcons color="#B7C0CF" name={icon} size={23} />
+        </Animated.View>
+        <Animated.View style={[styles.iconLayer, activeIconStyle]}>
+          <MaterialIcons color="#FFFFFF" name={icon} size={23} />
+        </Animated.View>
+      </View>
+    </Animated.View>
   );
 }
 
 export function LiquidTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
   const [layoutWidth, setLayoutWidth] = useState(0);
-  const [dragPreviewIndex, setDragPreviewIndex] = useState<number | null>(null);
   const routeCount = state.routes.length;
   const dragIndexRef = useRef(state.index);
   const isDraggingRef = useRef(false);
@@ -92,12 +149,12 @@ export function LiquidTabBar({ state, descriptors, navigation }: BottomTabBarPro
   }, [layoutWidth, routeCount]);
 
   const pillWidth = Math.max(itemWidth - PILL_INSET * 2, 0);
-  const basePillX = useMemo(
-    () => BAR_HORIZONTAL_PADDING + state.index * itemWidth + (itemWidth - pillWidth) / 2,
-    [itemWidth, pillWidth, state.index]
+  const basePillCenter = useMemo(
+    () => BAR_HORIZONTAL_PADDING + state.index * itemWidth + itemWidth / 2,
+    [itemWidth, state.index]
   );
 
-  const getPillX = (index: number) => BAR_HORIZONTAL_PADDING + index * itemWidth + (itemWidth - pillWidth) / 2;
+  const getTabCenterX = (index: number) => BAR_HORIZONTAL_PADDING + index * itemWidth + itemWidth / 2;
 
   const getIndexFromCenter = (centerX: number) => {
     'worklet';
@@ -110,9 +167,8 @@ export function LiquidTabBar({ state, descriptors, navigation }: BottomTabBarPro
     return clamp(raw, 0, routeCount - 1);
   };
 
-  const pillX = useSharedValue(0);
+  const lensCenterX = useSharedValue(0);
   const dragProgress = useSharedValue(0);
-  const activeIndex = dragPreviewIndex ?? state.index;
 
   const clearLongPressTimer = () => {
     if (!longPressTimerRef.current) {
@@ -130,15 +186,14 @@ export function LiquidTabBar({ state, descriptors, navigation }: BottomTabBarPro
 
     isDraggingRef.current = true;
 
-    const minX = getPillX(0);
-    const maxX = getPillX(routeCount - 1);
-    const nextX = clamp(touchX - pillWidth / 2, minX, maxX);
-    const nextIndex = getIndexFromCenter(nextX + pillWidth / 2);
+    const minCenter = getTabCenterX(0);
+    const maxCenter = getTabCenterX(routeCount - 1);
+    const nextCenter = clamp(touchX, minCenter, maxCenter);
+    const nextIndex = getIndexFromCenter(nextCenter);
 
     dragIndexRef.current = nextIndex;
-    setDragPreviewIndex(nextIndex);
     dragProgress.value = withSpring(1, SPRING_CONFIG);
-    pillX.value = withSpring(nextX, SPRING_CONFIG);
+    lensCenterX.value = withSpring(nextCenter, SPRING_CONFIG);
     triggerMediumHaptic();
   };
 
@@ -147,18 +202,17 @@ export function LiquidTabBar({ state, descriptors, navigation }: BottomTabBarPro
       return;
     }
 
-    const minX = getPillX(0);
-    const maxX = getPillX(routeCount - 1);
-    const nextX = clamp(touchX - pillWidth / 2, minX, maxX);
-    const nextIndex = getIndexFromCenter(nextX + pillWidth / 2);
+    const minCenter = getTabCenterX(0);
+    const maxCenter = getTabCenterX(routeCount - 1);
+    const nextCenter = clamp(touchX, minCenter, maxCenter);
+    const nextIndex = getIndexFromCenter(nextCenter);
 
     if (nextIndex !== dragIndexRef.current) {
       dragIndexRef.current = nextIndex;
-      setDragPreviewIndex(nextIndex);
       triggerLightHaptic();
     }
 
-    pillX.value = nextX;
+    lensCenterX.value = nextCenter;
   };
 
   const endDrag = () => {
@@ -170,9 +224,8 @@ export function LiquidTabBar({ state, descriptors, navigation }: BottomTabBarPro
 
     const nextIndex = dragIndexRef.current;
     isDraggingRef.current = false;
-    setDragPreviewIndex(null);
     dragProgress.value = withSpring(0, SPRING_CONFIG);
-    pillX.value = withSpring(getPillX(nextIndex), SPRING_CONFIG);
+    lensCenterX.value = withSpring(getTabCenterX(nextIndex), SPRING_CONFIG);
     navigateToIndex(nextIndex);
   };
 
@@ -182,13 +235,12 @@ export function LiquidTabBar({ state, descriptors, navigation }: BottomTabBarPro
     }
 
     dragIndexRef.current = state.index;
-    pillX.value = withSpring(basePillX, SPRING_CONFIG);
-  }, [basePillX, itemWidth, pillX, state.index]);
+    lensCenterX.value = withSpring(basePillCenter, SPRING_CONFIG);
+  }, [basePillCenter, itemWidth, lensCenterX, state.index]);
 
   useEffect(() => {
     return () => {
       clearLongPressTimer();
-      setDragPreviewIndex(null);
     };
   }, []);
 
@@ -213,8 +265,7 @@ export function LiquidTabBar({ state, descriptors, navigation }: BottomTabBarPro
     const tappedIndex = getIndexFromCenter(touchX);
     triggerLightHaptic();
     dragIndexRef.current = tappedIndex;
-    setDragPreviewIndex(null);
-    pillX.value = withSpring(getPillX(tappedIndex), SPRING_CONFIG);
+    lensCenterX.value = withSpring(getTabCenterX(tappedIndex), SPRING_CONFIG);
     navigateToIndex(tappedIndex);
   };
 
@@ -250,19 +301,49 @@ export function LiquidTabBar({ state, descriptors, navigation }: BottomTabBarPro
     }
 
     isDraggingRef.current = false;
-    setDragPreviewIndex(null);
     dragProgress.value = withSpring(0, SPRING_CONFIG);
-    pillX.value = withSpring(getPillX(state.index), SPRING_CONFIG);
+    lensCenterX.value = withSpring(getTabCenterX(state.index), SPRING_CONFIG);
   };
 
   const pillStyle = useAnimatedStyle(() => ({
     width: pillWidth,
     opacity: 0.98 + dragProgress.value * 0.02,
     transform: [
-      { translateX: pillX.value },
-      { scale: 1 + dragProgress.value * 0.035 },
+      { translateX: lensCenterX.value - pillWidth / 2 },
+      {
+        scaleX: interpolate(
+          getStretchProgress(lensCenterX.value, itemWidth) * dragProgress.value,
+          [0, 1],
+          [1, MAX_STRETCH_SCALE]
+        ),
+      },
+      {
+        scaleY: interpolate(
+          getStretchProgress(lensCenterX.value, itemWidth) * dragProgress.value,
+          [0, 1],
+          [1, 0.95]
+        ),
+      },
     ],
   }));
+
+  const chromaLeftStyle = useAnimatedStyle(() => {
+    const stretch = getStretchProgress(lensCenterX.value, itemWidth) * dragProgress.value;
+
+    return {
+      opacity: interpolate(stretch, [0, 1], [0.1, 0.3]),
+      transform: [{ translateX: interpolate(stretch, [0, 1], [0, -2]) }],
+    };
+  });
+
+  const chromaRightStyle = useAnimatedStyle(() => {
+    const stretch = getStretchProgress(lensCenterX.value, itemWidth) * dragProgress.value;
+
+    return {
+      opacity: interpolate(stretch, [0, 1], [0.08, 0.26]),
+      transform: [{ translateX: interpolate(stretch, [0, 1], [0, 2]) }],
+    };
+  });
 
   return (
     <Animated.View
@@ -296,6 +377,8 @@ export function LiquidTabBar({ state, descriptors, navigation }: BottomTabBarPro
           {itemWidth ? (
             <Animated.View style={[styles.activePillWrap, pillStyle]}>
               <View style={styles.activeHalo} />
+              <Animated.View style={[styles.chromaticFringeLeft, chromaLeftStyle]} />
+              <Animated.View style={[styles.chromaticFringeRight, chromaRightStyle]} />
               <View style={styles.activeTint} />
               <View style={styles.activePill} />
               <View style={styles.activeShine} />
@@ -315,9 +398,11 @@ export function LiquidTabBar({ state, descriptors, navigation }: BottomTabBarPro
                 <TabIcon
                   key={route.key}
                   accessibilityLabel={accessibilityLabel}
+                  centerX={getTabCenterX(index)}
+                  dragProgress={dragProgress}
                   icon={ICONS[routeName]}
-                  isFocused={activeIndex === index}
                   itemWidth={itemWidth}
+                  lensCenterX={lensCenterX}
                 />
               );
             })}
@@ -351,7 +436,7 @@ const styles = StyleSheet.create({
   },
   chrome: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(255,255,255,0.028)',
+    backgroundColor: 'rgba(255,255,255,0.026)',
   },
   edgeHighlight: {
     ...StyleSheet.absoluteFillObject,
@@ -370,20 +455,30 @@ const styles = StyleSheet.create({
     inset: -2,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: isIOS ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.10)',
-    boxShadow: isIOS ? '0 0 18px rgba(110, 184, 255, 0.18)' : '0 8px 16px rgba(0,0,0,0.2)',
+    borderColor: isIOS ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.10)',
+    boxShadow: isIOS ? '0 0 18px rgba(140, 208, 255, 0.16)' : '0 8px 16px rgba(0,0,0,0.2)',
+  },
+  chromaticFringeLeft: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 999,
+    backgroundColor: 'rgba(120, 222, 255, 0.18)',
+  },
+  chromaticFringeRight: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 999,
+    backgroundColor: 'rgba(180, 130, 255, 0.14)',
   },
   activeTint: {
     ...StyleSheet.absoluteFillObject,
     borderRadius: 999,
-    backgroundColor: isIOS ? 'rgba(182, 221, 255, 0.06)' : 'rgba(255,255,255,0.04)',
+    backgroundColor: isIOS ? 'rgba(186, 226, 255, 0.075)' : 'rgba(255,255,255,0.04)',
   },
   activePill: {
     flex: 1,
     borderRadius: 999,
-    backgroundColor: isIOS ? 'rgba(255,255,255,0.16)' : 'rgba(255,255,255,0.09)',
+    backgroundColor: isIOS ? 'rgba(255,255,255,0.17)' : 'rgba(255,255,255,0.09)',
     borderWidth: 1,
-    borderColor: isIOS ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.12)',
+    borderColor: isIOS ? 'rgba(255,255,255,0.24)' : 'rgba(255,255,255,0.12)',
   },
   activeShine: {
     position: 'absolute',
@@ -414,6 +509,17 @@ const styles = StyleSheet.create({
   },
   tabButton: {
     height: PILL_HEIGHT,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconStack: {
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconLayer: {
+    position: 'absolute',
     alignItems: 'center',
     justifyContent: 'center',
   },
