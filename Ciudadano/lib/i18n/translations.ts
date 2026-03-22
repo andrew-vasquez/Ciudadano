@@ -45,7 +45,7 @@ type AppCopy = {
       footer: string;
       createAccount: string;
       signIn: string;
-      highlights: Array<{ icon: string; title: string; subtitle: string }>;
+      highlights: { icon: string; title: string; subtitle: string }[];
     };
     signIn: {
       screenTitle: string;
@@ -88,14 +88,29 @@ type AppCopy = {
     eyebrow: string;
     title: string;
     description: string;
+    searchPlaceholder: string;
+    selectedAlert: string;
+    nearbyIncidentsStat: string;
+    coverageStat: string;
+    explore: string;
     silentModeTitle: string;
     silentModeDescription: string;
     emergencyBroadcastTitle: string;
     openSosFlow: string;
-    priorityContacts: string;
     featuredAlert: string;
     noAlertsTitle: string;
     noAlertsDescription: string;
+    actions: {
+      recenter: string;
+      createAlert: string;
+    };
+    filters: {
+      all: string;
+      police: string;
+      medical: string;
+      fire: string;
+      timeframe: string;
+    };
   };
   alerts: {
     loading: string;
@@ -232,7 +247,7 @@ export const translations: Record<Language, AppCopy> = {
         eyebrow: 'Ciudadano',
         title: 'A civic network built to respond faster.',
         description:
-          'Shape your safety circle, follow nearby alerts, and stay ready to respond with context instead of noise.',
+          'Follow nearby alerts, see them on a live map, and stay ready to respond with context instead of noise.',
         footer: 'Designed as a first-release shell with demo data and an architecture ready for a real backend.',
         createAccount: 'Create account',
         signIn: 'I already have an account',
@@ -244,8 +259,8 @@ export const translations: Record<Language, AppCopy> = {
           },
           {
             icon: 'emergency-share',
-            title: 'SOS and trusted circle',
-            subtitle: 'Share your location and trigger help through a single flow.',
+            title: 'Fast emergency response',
+            subtitle: 'Trigger SOS and escalate an urgent situation through a single flow.',
           },
           {
             icon: 'map',
@@ -292,19 +307,34 @@ export const translations: Record<Language, AppCopy> = {
       },
     },
     home: {
-      loading: 'Preparing your emergency center...',
+      loading: 'Loading the live map around you...',
       eyebrow: 'Ciudadano live',
-      title: 'Emergency center',
+      title: 'Live map',
       description:
-        'Quick access to SOS, priority services, and nearby alerts with clear context for better decisions.',
-      silentModeTitle: 'Silent mode',
-      silentModeDescription: 'No sound or vibration for discreet alerts.',
-      emergencyBroadcastTitle: 'Emergency broadcast',
-      openSosFlow: 'Open SOS flow',
-      priorityContacts: 'Priority contacts',
-      featuredAlert: 'Featured alert',
+        'See nearby reports on the map, track where incidents were posted, and open the latest alert details in one place.',
+      searchPlaceholder: 'Search location...',
+      selectedAlert: 'Selected alert',
+      nearbyIncidentsStat: 'Nearby active incidents',
+      coverageStat: 'Coverage radius',
+      explore: 'Explore further',
+      silentModeTitle: 'Quiet notifications',
+      silentModeDescription: 'Lower sound and vibration for lower-priority activity.',
+      emergencyBroadcastTitle: 'Emergency access',
+      openSosFlow: 'Open SOS',
+      featuredAlert: 'Latest reports',
       noAlertsTitle: 'No active alerts',
       noAlertsDescription: 'When your zone picks up incidents that matter, they will show up here first.',
+      actions: {
+        recenter: 'Center on me',
+        createAlert: 'Create alert',
+      },
+      filters: {
+        all: 'All',
+        police: 'Police',
+        medical: 'Medical',
+        fire: 'Fire',
+        timeframe: 'Timeframe',
+      },
     },
     alerts: {
       loading: 'Loading alerts for your area...',
@@ -392,13 +422,13 @@ export const translations: Record<Language, AppCopy> = {
         'This modal outlines the expected SOS trigger behavior and leaves the right space for real integrations later.',
       broadcastTitle: 'Emergency broadcast',
       broadcastDescription:
-        'Designed to combine personal contacts, geolocated context, and a local response channel.',
+        'Designed to combine geolocated context, emergency escalation, and a local response channel.',
       nextIntegrationTitle: 'Recommended next integration',
       nextIntegrationDescription:
         'Connect this flow to live location, real authentication, and a transactional backend for evidence, delivery audit, and confirmations.',
       acknowledge: 'Got it',
       steps: [
-        'Share live location with your safety circle.',
+        'Share your live incident context with responders.',
         'Notify priority services based on the emergency type.',
         'Create a visible alert for nearby residents and moderators.',
       ],
@@ -426,18 +456,19 @@ export const translations: Record<Language, AppCopy> = {
       dashboard: {
         locationLabel: 'Current location',
         locationAddress: 'Av. Reforma 222, CDMX',
-        locationImage:
-          'https://lh3.googleusercontent.com/aida-public/AB6AXuACUNQAK3Lok6kFVpQmFI0zZ9BevgPA_oEwPXbSmgIOvWxRoFyTXgWUA5cuozXRNS5w0zgqVbkYKcwm9xsL7db_Xoc98KRoGGfKgZYK5EBquk2Z03i7tf8CwI1xaqVgsT5cH11SD_-ydU-2VJD3BOODv9CPUDQCXyTTFVOoXqBHrRd_wPIuRzuIH1q0W-l7s7oKXiOAu0Vph3n_4349P8ZJZa-Xkj-urN0KU-fk0toD3FD1IKAzCVaHpFKLTWOdYYJBueQW5mJuxUzb',
+          mapRegion: {
+            latitude: 19.4318,
+            longitude: -99.1677,
+            latitudeDelta: 0.055,
+            longitudeDelta: 0.055,
+          },
+          watchRadiusLabel: '2.5 km watch radius',
         liveStatus: 'Live alert',
-        emergencyMessage: 'Connecting to your nearest response team and notifying your safety circle.',
+          emergencyMessage: 'Nearby incidents are plotted live so you can see what is happening around your current zone.',
         services: [
           { id: 'police', label: 'Police', description: 'Patrol and preventive response', icon: 'local-police', tone: 'info' },
           { id: 'medical', label: 'Medical', description: 'First aid and ambulance support', icon: 'medical-services', tone: 'critical' },
           { id: 'fire', label: 'Fire', description: 'Fire or structural risk response', icon: 'local-fire-department', tone: 'warning' },
-        ],
-        priorityContacts: [
-          { id: 'maria', name: 'Maria Martinez', role: 'Mother', phone: '+52 55 1234 5678', initials: 'MM' },
-          { id: 'ricardo', name: 'Ricardo Rodriguez', role: 'Brother', phone: '+52 55 9876 5432', initials: 'RR' },
         ],
       },
       incidents: [
@@ -447,6 +478,8 @@ export const translations: Record<Language, AppCopy> = {
           summary: 'Two people tried to jump the perimeter on Calle Emerson.',
           fullDescription:
             'Security staff reported two individuals attempting to breach the perimeter on Calle Emerson. The local patrol already notified authorities and the incident remains active.',
+            latitude: 19.4323,
+            longitude: -99.1942,
           minutesAgo: 3,
           neighborhood: 'Polanco',
           city: 'CDMX',
@@ -491,6 +524,8 @@ export const translations: Record<Language, AppCopy> = {
           summary: 'A vehicle is blocking the pedestrian exit by Plaza San Jacinto.',
           fullDescription:
             'Residents reported a vehicle parked over the pedestrian exit beside Plaza San Jacinto. A verbal dispute was also detected and the incident is being monitored.',
+            latitude: 19.3448,
+            longitude: -99.1912,
           minutesAgo: 11,
           neighborhood: 'San Angel',
           city: 'CDMX',
@@ -512,7 +547,9 @@ export const translations: Record<Language, AppCopy> = {
           title: 'Medical support request',
           summary: 'Medical assistance was requested for an older adult at Reforma 222.',
           fullDescription:
-            'The safety circle triggered a medical alert for an older adult with dizziness symptoms at Reforma 222. The first-aid team is on the way.',
+              'A medical alert was reported for an older adult with dizziness symptoms at Reforma 222. The first-aid team is on the way.',
+            latitude: 19.4276,
+            longitude: -99.1581,
           minutesAgo: 18,
           neighborhood: 'Juarez',
           city: 'CDMX',
@@ -575,7 +612,7 @@ export const translations: Record<Language, AppCopy> = {
       ],
       settingsItems: [
         { id: 'notifications', title: 'Smart notifications', description: 'Receive only alerts that matter based on your area and priority level.', icon: 'notifications-active', value: 'Enabled' },
-        { id: 'privacy', title: 'Location privacy', description: 'Control when to share your position with your safety circle.', icon: 'shield', value: 'Emergency only' },
+        { id: 'privacy', title: 'Location privacy', description: 'Control when your approximate position is attached to your reports and incident context.', icon: 'shield', value: 'Approximate only' },
         { id: 'community', title: 'Community moderation', description: 'Adjust the verification threshold required to show local incidents.', icon: 'groups', value: 'Balanced' },
       ],
     },
@@ -604,13 +641,13 @@ export const translations: Record<Language, AppCopy> = {
         eyebrow: 'Ciudadano',
         title: 'Una red ciudadana para reaccionar mejor.',
         description:
-          'Disena tu circulo de seguridad, sigue alertas de tu zona y mantente listo para responder con contexto, no con ruido.',
+          'Sigue alertas cercanas, velas en un mapa vivo y mantente listo para responder con contexto, no con ruido.',
         footer: 'Diseñado para un flujo inicial con datos demo y una arquitectura lista para backend real.',
         createAccount: 'Crear cuenta',
         signIn: 'Ya tengo cuenta',
         highlights: [
           { icon: 'verified-user', title: 'Alertas verificadas', subtitle: 'Ve incidentes priorizados por tu comunidad antes de que escalen.' },
-          { icon: 'emergency-share', title: 'SOS y circulo seguro', subtitle: 'Comparte tu ubicacion y activa apoyo inmediato con un solo flujo.' },
+          { icon: 'emergency-share', title: 'Respuesta rapida', subtitle: 'Activa el flujo SOS y escala una situacion urgente en un solo paso.' },
           { icon: 'map', title: 'Zonas para tu colonia', subtitle: 'Monitorea puntos clave y mantente al tanto de lo que pasa cerca de ti.' },
         ],
       },
@@ -651,18 +688,33 @@ export const translations: Record<Language, AppCopy> = {
       },
     },
     home: {
-      loading: 'Preparando el centro de emergencia...',
+      loading: 'Cargando el mapa vivo a tu alrededor...',
       eyebrow: 'Ciudadano live',
-      title: 'Centro de emergencia',
-      description: 'Accede rapido a tu SOS, servicios prioritarios y alertas cercanas con un contexto claro para actuar mejor.',
-      silentModeTitle: 'Modo silencioso',
-      silentModeDescription: 'Sin sonido ni vibraciones para alertas discretas.',
-      emergencyBroadcastTitle: 'Difusion de emergencia',
-      openSosFlow: 'Abrir flujo SOS',
-      priorityContacts: 'Contactos prioritarios',
-      featuredAlert: 'Alerta destacada',
+      title: 'Mapa en vivo',
+      description: 'Ve reportes cercanos en el mapa, ubica donde se publico cada incidente y abre el detalle mas reciente desde un solo lugar.',
+      searchPlaceholder: 'Buscar ubicacion...',
+      selectedAlert: 'Alerta seleccionada',
+      nearbyIncidentsStat: 'Incidentes activos cercanos',
+      coverageStat: 'Radio de cobertura',
+      explore: 'Explorar mas',
+      silentModeTitle: 'Notificaciones discretas',
+      silentModeDescription: 'Reduce sonido y vibracion para actividad de menor prioridad.',
+      emergencyBroadcastTitle: 'Acceso de emergencia',
+      openSosFlow: 'Abrir SOS',
+      featuredAlert: 'Reportes recientes',
       noAlertsTitle: 'Sin alertas activas',
       noAlertsDescription: 'Cuando tu zona registre incidentes de interes, apareceran aqui con prioridad.',
+      actions: {
+        recenter: 'Centrar en mi',
+        createAlert: 'Crear alerta',
+      },
+      filters: {
+        all: 'Todo',
+        police: 'Policia',
+        medical: 'Medico',
+        fire: 'Bomberos',
+        timeframe: 'Horario',
+      },
     },
     alerts: {
       loading: 'Cargando alertas de tu zona...',
@@ -728,12 +780,12 @@ export const translations: Record<Language, AppCopy> = {
       title: 'Flujo SOS',
       description: 'Este modal resume el comportamiento esperado del disparador SOS y deja listo el espacio para integraciones reales.',
       broadcastTitle: 'Broadcast de emergencia',
-      broadcastDescription: 'Diseñado para combinar contactos personales, contexto geolocalizado y un canal de respuesta local.',
+      broadcastDescription: 'Diseñado para combinar contexto geolocalizado, escalamiento de emergencia y un canal de respuesta local.',
       nextIntegrationTitle: 'Siguiente integracion recomendada',
       nextIntegrationDescription: 'Conectar este flujo con geolocalizacion, autenticacion real y un backend transaccional para conservar evidencia, auditoria y confirmaciones de entrega.',
       acknowledge: 'Entendido',
       steps: [
-        'Compartir ubicacion en tiempo real con tu circulo de seguridad.',
+        'Compartir contexto del incidente en tiempo real con personal de respuesta.',
         'Notificar servicios prioritarios segun el tipo de emergencia.',
         'Crear una alerta visible para vecinos y moderadores cercanos.',
       ],
@@ -759,18 +811,19 @@ export const translations: Record<Language, AppCopy> = {
       dashboard: {
         locationLabel: 'Ubicacion actual',
         locationAddress: 'Av. Reforma 222, CDMX',
-        locationImage:
-          'https://lh3.googleusercontent.com/aida-public/AB6AXuACUNQAK3Lok6kFVpQmFI0zZ9BevgPA_oEwPXbSmgIOvWxRoFyTXgWUA5cuozXRNS5w0zgqVbkYKcwm9xsL7db_Xoc98KRoGGfKgZYK5EBquk2Z03i7tf8CwI1xaqVgsT5cH11SD_-ydU-2VJD3BOODv9CPUDQCXyTTFVOoXqBHrRd_wPIuRzuIH1q0W-l7s7oKXiOAu0Vph3n_4349P8ZJZa-Xkj-urN0KU-fk0toD3FD1IKAzCVaHpFKLTWOdYYJBueQW5mJuxUzb',
+          mapRegion: {
+            latitude: 19.4318,
+            longitude: -99.1677,
+            latitudeDelta: 0.055,
+            longitudeDelta: 0.055,
+          },
+          watchRadiusLabel: 'Radio de vigilancia de 2.5 km',
         liveStatus: 'Alerta activa',
-        emergencyMessage: 'Conectando con tu equipo de respuesta mas cercano y notificando a tu circulo de seguridad.',
+          emergencyMessage: 'Los incidentes cercanos se muestran en vivo para que veas lo que sucede en tu zona actual.',
         services: [
           { id: 'police', label: 'Policia', description: 'Patrulla y apoyo preventivo', icon: 'local-police', tone: 'info' },
           { id: 'medical', label: 'Medico', description: 'Primeros auxilios y ambulancia', icon: 'medical-services', tone: 'critical' },
           { id: 'fire', label: 'Bomberos', description: 'Incendio o riesgo estructural', icon: 'local-fire-department', tone: 'warning' },
-        ],
-        priorityContacts: [
-          { id: 'maria', name: 'Maria Martinez', role: 'Madre', phone: '+52 55 1234 5678', initials: 'MM' },
-          { id: 'ricardo', name: 'Ricardo Rodriguez', role: 'Hermano', phone: '+52 55 9876 5432', initials: 'RR' },
         ],
       },
       incidents: [
@@ -780,6 +833,8 @@ export const translations: Record<Language, AppCopy> = {
           summary: 'Dos personas intentaron saltar el perimetro en Calle Emerson.',
           fullDescription:
             'Personal de seguridad reporto a dos individuos intentando vulnerar el perimetro en Calle Emerson. La patrulla comunitaria ya notifico a las autoridades y el incidente sigue activo.',
+            latitude: 19.4323,
+            longitude: -99.1942,
           minutesAgo: 3,
           neighborhood: 'Polanco',
           city: 'CDMX',
@@ -800,6 +855,8 @@ export const translations: Record<Language, AppCopy> = {
           title: 'Obstruccion vial y disputa',
           summary: 'Un vehiculo bloquea la salida peatonal frente a Plaza San Jacinto.',
           fullDescription: 'Vecinos reportaron un vehiculo estacionado sobre la salida peatonal junto a Plaza San Jacinto. Se detecto una disputa verbal y se marco como incidente en observacion.',
+            latitude: 19.3448,
+            longitude: -99.1912,
           minutesAgo: 11,
           neighborhood: 'San Angel',
           city: 'CDMX',
@@ -812,7 +869,9 @@ export const translations: Record<Language, AppCopy> = {
           id: 'medical-support-reforma',
           title: 'Solicitud de apoyo medico',
           summary: 'Se solicito asistencia medica para un adulto mayor en Reforma 222.',
-          fullDescription: 'El circulo de seguridad activo una alerta medica para un adulto mayor con sintomas de mareo en Reforma 222. El equipo de primeros auxilios va en camino.',
+          fullDescription: 'Se reporto una alerta medica para un adulto mayor con sintomas de mareo en Reforma 222. El equipo de primeros auxilios va en camino.',
+            latitude: 19.4276,
+            longitude: -99.1581,
           minutesAgo: 18,
           neighborhood: 'Juarez',
           city: 'CDMX',
@@ -853,7 +912,7 @@ export const translations: Record<Language, AppCopy> = {
       ],
       settingsItems: [
         { id: 'notifications', title: 'Notificaciones inteligentes', description: 'Recibe solo alertas relevantes segun tu zona y nivel de prioridad.', icon: 'notifications-active', value: 'Activadas' },
-        { id: 'privacy', title: 'Privacidad de ubicacion', description: 'Controla cuando compartir tu posicion con tu circulo de seguridad.', icon: 'shield', value: 'Solo emergencias' },
+        { id: 'privacy', title: 'Privacidad de ubicacion', description: 'Controla cuando tu posicion aproximada se adjunta a tus reportes y al contexto del incidente.', icon: 'shield', value: 'Solo aproximada' },
         { id: 'community', title: 'Moderacion comunitaria', description: 'Ajusta el nivel de verificacion requerido para ver incidentes locales.', icon: 'groups', value: 'Balanceado' },
       ],
     },

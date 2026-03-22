@@ -1,9 +1,10 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useEffect, useState } from 'react';
-import { Pressable, Text, TextInput, View } from 'react-native';
+import { Text, TextInput, View } from 'react-native';
 
 import { AppButton } from '@/components/ui/app-button';
 import { AppCard } from '@/components/ui/app-card';
+import { BouncyPressable } from '@/components/ui/bouncy-pressable';
 import { LoadingScreen } from '@/components/ui/loading-screen';
 import { ScreenView } from '@/components/ui/screen-view';
 import { reportingRepository } from '@/lib/data/mock-repositories';
@@ -42,20 +43,21 @@ export default function PostScreen() {
       eyebrow={copy.post.eyebrow}
       title={copy.post.title}
       description={copy.post.description}>
-      <View className="gap-3">
+      <View className="gap-2.5">
         {categories.map((category) => {
           const selected = category.id === selectedCategory;
 
           return (
-            <Pressable
+            <BouncyPressable
               key={category.id}
               accessibilityRole="button"
               onPress={() => setSelectedCategory(category.id)}
-              className={`rounded-3xl border px-4 py-4 ${
-                selected ? 'border-blue-500 bg-blue-950/40' : 'border-zinc-800 bg-zinc-950'
+              pressScale={0.988}
+              className={`rounded-[22px] border px-4 py-4 ${
+                selected ? 'border-blue-500/80 bg-blue-950/30' : 'border-zinc-800 bg-zinc-950/80'
               }`}>
               <View className="flex-row items-center gap-4">
-                <View className="h-12 w-12 items-center justify-center rounded-2xl bg-black/40">
+                <View className="h-11 w-11 items-center justify-center rounded-[18px] bg-black/35">
                   <MaterialIcons
                     color={selected ? '#93C5FD' : '#A1A1AA'}
                     name={category.icon as keyof typeof MaterialIcons.glyphMap}
@@ -67,7 +69,7 @@ export default function PostScreen() {
                   <Text className="text-sm leading-5 text-zinc-400">{category.subtitle}</Text>
                 </View>
               </View>
-            </Pressable>
+            </BouncyPressable>
           );
         })}
       </View>
@@ -80,7 +82,7 @@ export default function PostScreen() {
             onChangeText={setHeadline}
             placeholder={copy.post.headlinePlaceholder}
             placeholderTextColor="#71717A"
-            className="min-h-14 rounded-2xl border border-zinc-800 bg-black px-4 text-base text-white"
+            className="min-h-12 rounded-[18px] border border-zinc-800 bg-black/85 px-4 text-base text-white"
           />
         </View>
         <View className="gap-2">
@@ -91,11 +93,11 @@ export default function PostScreen() {
             multiline
             placeholder={copy.post.detailsPlaceholder}
             placeholderTextColor="#71717A"
-            className="min-h-36 rounded-2xl border border-zinc-800 bg-black px-4 py-4 text-base text-white"
+            className="min-h-32 rounded-[18px] border border-zinc-800 bg-black/85 px-4 py-4 text-base text-white"
             textAlignVertical="top"
           />
         </View>
-        <View className="rounded-2xl border border-zinc-800 bg-black px-4 py-4">
+        <View className="rounded-[18px] border border-zinc-800 bg-black/85 px-4 py-4">
           <Text className="text-xs font-semibold uppercase tracking-[1.5px] text-zinc-500">{copy.post.preview}</Text>
           <Text className="mt-2 text-lg font-semibold text-white">{headline}</Text>
           <Text className="mt-2 text-sm leading-6 text-zinc-400">{details}</Text>

@@ -20,22 +20,21 @@ export interface EmergencyService {
   tone: AlertTone;
 }
 
-export interface PriorityContact {
-  id: string;
-  name: string;
-  role: string;
-  phone: string;
-  initials: string;
+export interface MapRegion {
+  latitude: number;
+  longitude: number;
+  latitudeDelta: number;
+  longitudeDelta: number;
 }
 
 export interface HomeDashboard {
   locationLabel: string;
   locationAddress: string;
-  locationImage: string;
+  mapRegion: MapRegion;
+  watchRadiusLabel: string;
   liveStatus: string;
   emergencyMessage: string;
   services: EmergencyService[];
-  priorityContacts: PriorityContact[];
 }
 
 export interface IncidentTimelineEntry {
@@ -55,6 +54,8 @@ export interface Incident {
   title: string;
   summary: string;
   fullDescription: string;
+  latitude: number;
+  longitude: number;
   minutesAgo: number;
   neighborhood: string;
   city: string;

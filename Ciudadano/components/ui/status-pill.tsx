@@ -16,8 +16,8 @@ interface StatusPillProps {
 
 export function StatusPill({ label, tone = 'neutral' }: StatusPillProps) {
   return (
-    <View className={`self-start rounded-full border px-3 py-1 ${toneStyles[tone].container}`}>
-      <Text className={`text-[11px] font-semibold uppercase tracking-[1px] ${toneStyles[tone].text}`}>{label}</Text>
+    <View className={`self-start rounded-full border px-3 py-1.5 ${toneStyles[tone].container}`}>
+      <Text className={`text-[10px] font-semibold uppercase tracking-[1.1px] ${toneStyles[tone].text}`}>{label}</Text>
     </View>
   );
 }

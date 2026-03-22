@@ -1,5 +1,4 @@
 import { Image } from 'expo-image';
-import { Link } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
 
@@ -98,24 +97,6 @@ export default function ProfileScreen() {
             title={zone.name}
             subtitle={`${zone.radiusLabel} • ${zone.scheduleLabel}`}
             trailing={zone.enabled ? copy.common.active : copy.common.paused}
-          />
-        ))}
-      </View>
-
-      <View className="gap-3">
-        <View className="flex-row items-center justify-between">
-          <Text className="text-xl font-bold tracking-tight text-white">{copy.profile.safetyCircle}</Text>
-          <Link href="/(app)/safety-circle" className="text-sm font-semibold text-blue-300">
-            {copy.common.manage}
-          </Link>
-        </View>
-        {profile.safetyCircle.map((member) => (
-          <ListRow
-            key={member.id}
-            icon="call"
-            title={member.name}
-            subtitle={`${member.role} • ${member.phone}`}
-            trailing={copy.common.active}
           />
         ))}
       </View>

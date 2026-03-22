@@ -1,5 +1,7 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
+
+import { BouncyPressable } from '@/components/ui/bouncy-pressable';
 
 interface ListRowProps {
   icon: keyof typeof MaterialIcons.glyphMap;
@@ -11,12 +13,11 @@ interface ListRowProps {
 
 export function ListRow({ icon, title, subtitle, trailing, onPress }: ListRowProps) {
   return (
-    <Pressable
+    <BouncyPressable
       accessibilityRole={onPress ? 'button' : undefined}
       onPress={onPress}
-      className={`min-h-16 flex-row items-center gap-4 rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-4 ${
-        onPress ? 'active:scale-[0.99]' : ''
-      }`}>
+      pressScale={0.985}
+      className="min-h-16 flex-row items-center gap-4 rounded-2xl border border-zinc-800 bg-zinc-950 px-4 py-4">
       <View className="h-11 w-11 items-center justify-center rounded-2xl bg-zinc-900">
         <MaterialIcons color="#60a5fa" name={icon} size={22} />
       </View>
@@ -25,6 +26,6 @@ export function ListRow({ icon, title, subtitle, trailing, onPress }: ListRowPro
         <Text className="text-sm leading-5 text-zinc-400">{subtitle}</Text>
       </View>
       {trailing ? <Text className="text-xs font-semibold uppercase tracking-wide text-zinc-400">{trailing}</Text> : null}
-    </Pressable>
+    </BouncyPressable>
   );
 }

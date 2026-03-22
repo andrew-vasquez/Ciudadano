@@ -19,16 +19,16 @@ export function ScreenView({
     <ScrollView
       className="flex-1 bg-black"
       contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 120, gap: 20 }}>
+      contentContainerStyle={{ paddingHorizontal: 18, paddingBottom: 108, gap: 16 }}>
       {eyebrow || title || description || headerAccessory ? (
-        <View className="gap-4 pt-3">
+        <View className="gap-3 pt-2">
           <View className="flex-row items-start justify-between gap-4">
-            <View className="flex-1 gap-2">
+            <View className="flex-1 gap-1.5">
               {eyebrow ? (
                 <Text className="text-[11px] font-semibold uppercase tracking-[1.5px] text-blue-300">{eyebrow}</Text>
               ) : null}
-              {title ? <Text className="text-4xl font-black tracking-tight text-white">{title}</Text> : null}
-              {description ? <Text className="text-base leading-7 text-zinc-400">{description}</Text> : null}
+              {title ? <Text className="text-[34px] font-black tracking-tight text-white">{title}</Text> : null}
+              {description ? <Text className="text-[15px] leading-6 text-zinc-400">{description}</Text> : null}
             </View>
             {headerAccessory}
           </View>

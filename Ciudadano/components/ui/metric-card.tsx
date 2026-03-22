@@ -12,13 +12,13 @@ interface MetricCardProps {
 
 export function MetricCard({ label, value, description, icon }: MetricCardProps) {
   return (
-    <AppCard className="flex-1 gap-6">
+    <AppCard className="flex-1 gap-4">
       <View className="flex-row items-center justify-between">
         <Text className="text-[11px] font-semibold uppercase tracking-[1.5px] text-blue-300">{label}</Text>
-        <MaterialIcons color="#60a5fa" name={icon} size={20} />
+        <MaterialIcons color="#60a5fa" name={icon} size={18} />
       </View>
       <View className="gap-1">
-        <Text className="text-4xl font-black tracking-tight text-white">{value}</Text>
+        <Text className="text-[32px] font-black tracking-tight text-white">{value}</Text>
         <Text className="text-sm leading-5 text-zinc-400">{description}</Text>
       </View>
     </AppCard>

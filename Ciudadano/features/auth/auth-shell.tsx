@@ -1,5 +1,6 @@
 import type { PropsWithChildren, ReactNode } from 'react';
 import { ScrollView, Text, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 
 interface AuthShellProps extends PropsWithChildren {
   eyebrow: string;
@@ -13,18 +14,18 @@ export function AuthShell({ eyebrow, title, description, footer, children }: Aut
     <ScrollView
       className="flex-1 bg-black"
       contentInsetAdjustmentBehavior="automatic"
-      contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40, paddingTop: 28, gap: 28 }}>
-      <View className="gap-6">
-        <View className="gap-4">
+      contentContainerStyle={{ paddingHorizontal: 18, paddingBottom: 40, paddingTop: 22, gap: 22 }}>
+      <Animated.View entering={FadeInDown.duration(260).springify().damping(18).stiffness(170)} className="gap-5">
+        <View className="gap-3">
           <Text className="text-[11px] font-semibold uppercase tracking-[2px] text-blue-300">{eyebrow}</Text>
-          <View className="gap-3">
-            <Text className="text-5xl font-black leading-[56px] tracking-tight text-white">{title}</Text>
-            <Text className="text-base leading-7 text-zinc-400">{description}</Text>
+          <View className="gap-2.5">
+            <Text className="text-[40px] font-black leading-[46px] tracking-tight text-white">{title}</Text>
+            <Text className="text-[15px] leading-6 text-zinc-400">{description}</Text>
           </View>
         </View>
-        <View className="rounded-[28px] border border-zinc-800 bg-zinc-950 p-5">{children}</View>
+        <View className="rounded-[24px] border border-zinc-800 bg-zinc-950/88 p-4">{children}</View>
         {footer}
-      </View>
+      </Animated.View>
     </ScrollView>
   );
 }

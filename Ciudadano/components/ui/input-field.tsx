@@ -32,7 +32,8 @@ export function InputField({
         secureTextEntry={secureTextEntry}
         autoCapitalize={autoCapitalize}
         keyboardType={keyboardType}
-        className="min-h-14 rounded-2xl border border-zinc-800 bg-zinc-950 px-4 text-base text-white"
+        className="rounded-[18px] border border-zinc-800 bg-zinc-950/88 px-4 text-base text-white"
+        style={{ minHeight: 52 }}
       />
       {helperText ? <Text className="text-xs leading-5 text-zinc-400">{helperText}</Text> : null}
     </View>

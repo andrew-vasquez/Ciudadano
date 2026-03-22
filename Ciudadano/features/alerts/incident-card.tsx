@@ -1,8 +1,9 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Link } from 'expo-router';
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
 import { AppCard } from '@/components/ui/app-card';
+import { BouncyPressable } from '@/components/ui/bouncy-pressable';
 import { StatusPill } from '@/components/ui/status-pill';
 import { useI18n } from '@/lib/i18n/language-provider';
 import type { Incident } from '@/lib/data/types';
@@ -16,15 +17,15 @@ export function IncidentCard({ incident }: IncidentCardProps) {
 
   return (
     <Link href={`/(app)/incidents/${incident.id}`} asChild>
-      <Pressable accessibilityRole="button">
-        <AppCard className="gap-4">
+      <BouncyPressable accessibilityRole="button" pressScale={0.988}>
+        <AppCard className="gap-3">
           <View className="flex-row items-start justify-between gap-4">
             <View className="flex-1 gap-2">
               <StatusPill label={copy.alerts.tones[incident.tone]} tone={incident.tone} />
-              <Text className="text-2xl font-bold tracking-tight text-white">{incident.title}</Text>
-              <Text className="text-sm leading-6 text-zinc-400">{incident.summary}</Text>
+              <Text className="text-[22px] font-bold tracking-tight text-white">{incident.title}</Text>
+              <Text className="text-sm leading-5 text-zinc-400">{incident.summary}</Text>
             </View>
-            <View className="items-end gap-2">
+            <View className="items-end gap-1.5">
               <Text className="text-xs font-semibold uppercase tracking-[1px] text-zinc-500">
                 {copy.common.minutesAgo(incident.minutesAgo)}
               </Text>
@@ -36,7 +37,7 @@ export function IncidentCard({ incident }: IncidentCardProps) {
               </View>
             </View>
           </View>
-          <View className="flex-row items-center justify-between rounded-2xl bg-zinc-900 px-4 py-3">
+          <View className="flex-row items-center justify-between rounded-[18px] bg-zinc-900/80 px-4 py-3">
             <View className="gap-1">
               <Text className="text-sm font-semibold text-zinc-100">
                 {incident.neighborhood}, {incident.city}
@@ -46,7 +47,7 @@ export function IncidentCard({ incident }: IncidentCardProps) {
             <MaterialIcons color="#A1A1AA" name="chevron-right" size={22} />
           </View>
         </AppCard>
-      </Pressable>
+      </BouncyPressable>
     </Link>
   );
 }

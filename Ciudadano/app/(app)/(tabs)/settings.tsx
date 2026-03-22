@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Pressable, Switch, Text, View } from 'react-native';
+import { Switch, Text, View } from 'react-native';
 
 import { AppButton } from '@/components/ui/app-button';
 import { AppCard } from '@/components/ui/app-card';
+import { BouncyPressable } from '@/components/ui/bouncy-pressable';
 import { ListRow } from '@/components/ui/list-row';
 import { LoadingScreen } from '@/components/ui/loading-screen';
 import { ScreenView } from '@/components/ui/screen-view';
@@ -75,17 +76,20 @@ export default function SettingsScreen() {
             const label = option === 'en' ? copy.settings.english : copy.settings.spanish;
 
             return (
-              <Pressable
+              <BouncyPressable
                 key={option}
                 accessibilityRole="button"
                 onPress={() => {
                   void setLanguage(option);
                 }}
-                className={`flex-1 rounded-2xl border px-4 py-4 ${selected ? 'border-blue-500 bg-blue-950/30' : 'border-zinc-800 bg-zinc-950'}`}>
+                pressScale={0.985}
+                className={`flex-1 rounded-[18px] border px-4 py-3.5 ${
+                  selected ? 'border-blue-500 bg-blue-950/30' : 'border-zinc-800 bg-zinc-950/80'
+                }`}>
                 <Text className={`text-center text-sm font-semibold ${selected ? 'text-blue-200' : 'text-zinc-200'}`}>
                   {label}
                 </Text>
-              </Pressable>
+              </BouncyPressable>
             );
           })}
         </View>
