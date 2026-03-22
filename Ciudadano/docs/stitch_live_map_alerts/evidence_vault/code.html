@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-variant": "#262626",
+              "tertiary-fixed-dim": "#ec94f0",
+              "on-secondary-fixed": "#05278f",
+              "on-secondary": "#001661",
+              "surface-tint": "#87adff",
+              "primary-container": "#6f9fff",
+              "on-tertiary-fixed-variant": "#702379",
+              "background": "#0e0e0e",
+              "error-dim": "#d7383b",
+              "tertiary-fixed": "#fba1ff",
+              "secondary-container": "#233ca1",
+              "primary-dim": "#006ff0",
+              "outline": "#777575",
+              "on-error-container": "#ffa8a3",
+              "secondary": "#8197ff",
+              "on-tertiary-fixed": "#4a0054",
+              "primary-fixed-dim": "#5690ff",
+              "on-error": "#490006",
+              "on-secondary-fixed-variant": "#2f47ac",
+              "outline-variant": "#494847",
+              "inverse-primary": "#005ac6",
+              "secondary-fixed": "#c7cfff",
+              "tertiary": "#feb7ff",
+              "tertiary-dim": "#ec94f0",
+              "surface-container-lowest": "#000000",
+              "secondary-fixed-dim": "#b5c0ff",
+              "secondary-dim": "#8197ff",
+              "surface": "#0e0e0e",
+              "inverse-on-surface": "#565554",
+              "error": "#ff716c",
+              "surface-container-highest": "#262626",
+              "on-surface-variant": "#adaaaa",
+              "surface-dim": "#0e0e0e",
+              "on-background": "#ffffff",
+              "tertiary-container": "#fba1ff",
+              "on-primary-container": "#002151",
+              "surface-container": "#1a1919",
+              "on-surface": "#ffffff",
+              "error-container": "#9f0519",
+              "surface-container-high": "#201f1f",
+              "surface-bright": "#2c2c2c",
+              "inverse-surface": "#fcf8f8",
+              "on-tertiary-container": "#65186f",
+              "on-primary": "#002c67",
+              "on-tertiary": "#702379",
+              "surface-container-low": "#131313",
+              "on-primary-fixed-variant": "#002a63",
+              "on-secondary-container": "#c6ceff",
+              "on-primary-fixed": "#000000",
+              "primary": "#87adff",
+              "primary-fixed": "#6f9fff"
+            },
+            fontFamily: {
+              "headline": ["Inter"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .glass-card {
+        background: rgba(26, 25, 25, 0.4);
+        backdrop-filter: blur(20px);
+      }
+      .liquid-gradient {
+        background: linear-gradient(135deg, #87adff 0%, #6f9fff 100%);
+      }
+      body {
+        background-color: #0e0e0e;
+        color: #ffffff;
+        font-family: 'Inter', sans-serif;
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="bg-neutral-900/80 backdrop-blur-xl rounded-b-[3rem] w-full sticky top-0 z-50 flex justify-between items-center px-6 py-4 shadow-[0_20px_40px_rgba(255,255,255,0.04)]">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden border border-white/10 active:scale-95 transition-transform">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="Close up portrait of a young man" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJ6DBod0Pq_ImaU2OaEreLyKnH1-x7fER89khjprykN-Rck_nutf7Vp7zVGtkT5Ovg09EdWYlG2bzQ0Q2C9CB0wEpoUlyH2DlaLvrjDOi9KlqIzD74sgdzt4J3hhU2qasXOn9bS6Ok9w9BTmw6yZlfoBiEQ-Zu3Y_pBnff6c5DKg_OSgjshm8Gdas_WxfU04zJOF9D061hnfU35-sgoJdD0L0dZqK1pYMyW59SWt_N5QcRAmtbdlt02Ha8wQQ-2sPKCtxfLQnXWZjN"/>
+</div>
+<span class="text-2xl font-black tracking-tighter text-blue-400">Ciudadano</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-neutral-400 hover:bg-white/5 transition-all duration-300 p-2 rounded-full active:scale-95">search</button>
+<button class="material-symbols-outlined text-neutral-400 hover:bg-white/5 transition-all duration-300 p-2 rounded-full active:scale-95">more_vert</button>
+</div>
+</header>
+<main class="px-6 pt-10 max-w-5xl mx-auto">
+<!-- Hero Section -->
+<section class="mb-12">
+<div class="flex items-end justify-between mb-6">
+<div>
+<span class="label-sm text-primary font-bold tracking-widest uppercase mb-2 block">SECURE ARCHIVE</span>
+<h1 class="text-4xl md:text-5xl font-black tracking-tighter leading-none">Evidence Vault</h1>
+</div>
+<button class="liquid-gradient text-on-primary-container px-6 py-3 rounded-full font-bold flex items-center gap-2 active:scale-95 transition-transform shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">share</span>
+<span class="text-sm">Share to Authorities</span>
+</button>
+</div>
+<!-- Quick Stats Bento -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+<div class="glass-card p-6 rounded-xl flex flex-col justify-between h-40">
+<span class="material-symbols-outlined text-blue-400 text-3xl">verified</span>
+<div>
+<div class="text-3xl font-bold tracking-tighter">128</div>
+<div class="text-neutral-500 text-xs font-bold tracking-wider uppercase">Verified Files</div>
+</div>
+</div>
+<div class="glass-card p-6 rounded-xl flex flex-col justify-between h-40">
+<span class="material-symbols-outlined text-tertiary text-3xl">encrypted</span>
+<div>
+<div class="text-3xl font-bold tracking-tighter">AES-256</div>
+<div class="text-neutral-500 text-xs font-bold tracking-wider uppercase">Vault Encryption</div>
+</div>
+</div>
+<div class="glass-card p-6 rounded-xl flex flex-col justify-between h-40 bg-primary/5 border border-primary/10">
+<span class="material-symbols-outlined text-primary text-3xl">cloud_done</span>
+<div>
+<div class="text-3xl font-bold tracking-tighter">4.2 GB</div>
+<div class="text-neutral-500 text-xs font-bold tracking-wider uppercase">Total Evidence Size</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Folder Structure: Date Sorted -->
+<section class="space-y-12">
+<!-- Folder Group 1 -->
+<div>
+<div class="flex items-center gap-4 mb-6">
+<div class="h-[2px] flex-grow bg-white/5"></div>
+<h2 class="text-neutral-400 font-bold text-xs tracking-[0.2em] uppercase whitespace-nowrap">October 2023</h2>
+<div class="h-[2px] flex-grow bg-white/5"></div>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+<!-- Evidence Item 1 (Video) -->
+<div class="group relative aspect-square rounded-xl overflow-hidden glass-card cursor-pointer">
+<img alt="Neighborhood Street" class="w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-700" data-alt="Dark surveillance footage of a quiet neighborhood street at night" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdsn_s6ChsoO-eSflGwPoGi7pE7oDs4s8kbaFXeR8C8--VANqMm0j4k3PeN_LYeFH979YvbBvY5ukJAWcJ1P_FbQSNKAiST6OpooEPgk_fFf7ROeVIHdzXT3jGnwXBBna0Etmq09EdYTd-7H52xdP2ZH0hSL7Qke2TRcA5HBE4c4Yp2z-IsRaEfTWcMRN_Ol4F6uDdazNkJo3_oIhXld2iiiKsi-9c4BXvQZMlQcWMoxboS8ZNwq2AJlhtbJSRTxFTMC_04DLuNei9"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+<div class="absolute top-4 left-4 flex gap-2">
+<span class="material-symbols-outlined text-primary bg-black/40 backdrop-blur-md p-1.5 rounded-full text-sm" style="font-variation-settings: 'FILL' 1;">videocam</span>
+<span class="material-symbols-outlined text-blue-400 bg-black/40 backdrop-blur-md p-1.5 rounded-full text-sm" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<div class="absolute bottom-4 left-4 right-4">
+<p class="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1">Oct 24, 23:15</p>
+<p class="text-sm font-bold truncate">Unusual Activity #04</p>
+</div>
+</div>
+<!-- Evidence Item 2 (Photo) -->
+<div class="group relative aspect-square rounded-xl overflow-hidden glass-card cursor-pointer">
+<img alt="Fence Detail" class="w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-700" data-alt="Close up of a broken perimeter fence" src="https://lh3.googleusercontent.com/aida-public/AB6AXuChQBapVsQaAWn3Z2dvr9E_ychTC5RqKlfBf3VvEBcVT4Eth5cmdYDWfuTrZv8cTZz_ypPdz1bqiaX84cQDEPgIzGd8RD24AW-VXZ5QKam4CtlztKbY29a2MEZZ6i8W8wR9aVfQRxohVU_rvBB4f1xCEYh5d_DtCLFk5AYTJugwg275rp6LYl4daaRbbSqthh4M4E1_C9Zdry751Wgr3UYa4wLqgQ_0NxctUVysb_75Fle2FWXh7PXWGgD-gbiC3RDfd1_XzJDDypgP"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+<div class="absolute top-4 left-4 flex gap-2">
+<span class="material-symbols-outlined text-white/70 bg-black/40 backdrop-blur-md p-1.5 rounded-full text-sm">photo_camera</span>
+<span class="material-symbols-outlined text-blue-400 bg-black/40 backdrop-blur-md p-1.5 rounded-full text-sm" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<div class="absolute bottom-4 left-4 right-4">
+<p class="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1">Oct 22, 14:30</p>
+<p class="text-sm font-bold truncate">Property Damage</p>
+</div>
+</div>
+<!-- Folder Placeholder -->
+<div class="aspect-square rounded-xl flex flex-col items-center justify-center glass-card border-2 border-dashed border-white/5 hover:border-primary/20 transition-colors group">
+<div class="w-14 h-14 rounded-full bg-white/5 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-neutral-500">folder_zip</span>
+</div>
+<span class="text-xs font-bold text-neutral-500 tracking-wider uppercase">Archived Folders</span>
+</div>
+<!-- Upload Placeholder -->
+<div class="aspect-square rounded-xl flex flex-col items-center justify-center bg-blue-600/5 border-2 border-dashed border-blue-400/20 hover:border-blue-400/40 transition-colors cursor-pointer">
+<div class="w-14 h-14 rounded-full bg-blue-400/10 flex items-center justify-center mb-3">
+<span class="material-symbols-outlined text-blue-400">add_photo_alternate</span>
+</div>
+<span class="text-xs font-bold text-blue-400 tracking-wider uppercase">Add Evidence</span>
+</div>
+</div>
+</div>
+<!-- Folder Group 2 -->
+<div>
+<div class="flex items-center gap-4 mb-6">
+<div class="h-[2px] flex-grow bg-white/5"></div>
+<h2 class="text-neutral-400 font-bold text-xs tracking-[0.2em] uppercase whitespace-nowrap">September 2023</h2>
+<div class="h-[2px] flex-grow bg-white/5"></div>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+<div class="group relative aspect-square rounded-xl overflow-hidden glass-card cursor-pointer">
+<img alt="Street CCTV" class="w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-700" data-alt="CCTV perspective of a city intersection" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBjghtYpW2LKD7h24uZwm5B3bhcEkD26-3wpDj-Y5hHXqZ0yvr6mpeQJjjNFi8BtuOh05b-DZSfubX8eV4_gx_0thCXwy7d2MpGaDxCLvoTuTa548bBGbRKv1c12Vy9h4i12_tG1N3UH804ADiVXMTS00WZF8YY8kBPeIINm7Fm6HM3olhwDupps6RHabLpCiF4SOhFpshKNtqd3YbsKn9ej0Rk7CYop8K-SLrolfReepDWQCmnbMtP4wwjtBiLXlMfRni2H1jzmVb5"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+<div class="absolute top-4 left-4 flex gap-2">
+<span class="material-symbols-outlined text-primary bg-black/40 backdrop-blur-md p-1.5 rounded-full text-sm" style="font-variation-settings: 'FILL' 1;">videocam</span>
+</div>
+<div class="absolute bottom-4 left-4 right-4">
+<p class="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1">Sep 15, 02:45</p>
+<p class="text-sm font-bold truncate">Intersection Cam 02</p>
+</div>
+</div>
+<div class="group relative aspect-square rounded-xl overflow-hidden glass-card cursor-pointer col-span-2 md:col-span-1">
+<div class="w-full h-full flex flex-col p-6">
+<div class="flex-grow">
+<span class="material-symbols-outlined text-tertiary text-4xl mb-4" style="font-variation-settings: 'FILL' 1;">audio_file</span>
+<h3 class="font-bold text-lg leading-tight">Emergency Call Audio Recording</h3>
+</div>
+<div class="flex items-center gap-2">
+<div class="flex-grow h-1 bg-white/10 rounded-full overflow-hidden">
+<div class="h-full w-1/3 bg-tertiary"></div>
+</div>
+<span class="text-[10px] font-bold text-neutral-500">0:45</span>
+</div>
+</div>
+</div>
+<div class="group relative aspect-square rounded-xl overflow-hidden glass-card cursor-pointer">
+<img alt="Evidence Document" class="w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-700" data-alt="Close up of a police report document with stamps" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6E1xcyd0llYO5MhhFZ1amh665P5-3-qfVWSQfoKBIDE3Lt6X0YJBPVuGJG-GMNPNw_fcdFmFuMynXSgAiuEFKqQ2txjEpsWSRx6RplkqtLlBjbvCGqk0m1MXmQkH0caKs51mk54G6l_2xxIJHtkFV5nAaEd72At27jI_yH6ivZwBBfzI9rqL0pZxgwifsuhxNoqfJHCR5fO1X5ya0R8lzhJzqQ7ClPKyqLgBf2wWM2ECvKM11PNj6dKFhbx3NaT0tylvlbwTWT4pr"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+<div class="absolute top-4 left-4 flex gap-2">
+<span class="material-symbols-outlined text-white/70 bg-black/40 backdrop-blur-md p-1.5 rounded-full text-sm">description</span>
+<span class="material-symbols-outlined text-blue-400 bg-black/40 backdrop-blur-md p-1.5 rounded-full text-sm" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<div class="absolute bottom-4 left-4 right-4">
+<p class="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1">Sep 08, 10:15</p>
+<p class="text-sm font-bold truncate">Police Report Copy</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full flex justify-around items-center px-6 pb-8 z-50">
+<div class="bg-black/80 backdrop-blur-2xl rounded-full mx-4 fixed bottom-6 left-0 right-0 h-20 flex justify-around items-center shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
+<a class="flex flex-col items-center justify-center text-neutral-500 p-4 hover:text-blue-300 transition-colors active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">map</span>
+</a>
+<a class="flex flex-col items-center justify-center text-neutral-500 p-4 hover:text-blue-300 transition-colors active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">notifications</span>
+</a>
+<div class="flex flex-col items-center justify-center -translate-y-4">
+<button class="liquid-gradient text-on-primary-container p-5 rounded-full shadow-2xl active:scale-90 transition-all">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+</button>
+</div>
+<a class="flex flex-col items-center justify-center bg-blue-600/20 text-blue-400 rounded-full p-4 scale-110 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">leaderboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-neutral-500 p-4 hover:text-blue-300 transition-colors active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">person</span>
+</a>
+</div>
+</nav>
+</body></html>
