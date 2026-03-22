@@ -34,6 +34,11 @@ const PILL_HEIGHT = 54;
 const PILL_INSET = 6;
 const HOLD_DELAY_MS = 120;
 const MAX_STRETCH_SCALE = 1.52;
+const TRACKING_SPRING_CONFIG = {
+  damping: 18,
+  stiffness: 300,
+  mass: 0.7,
+} as const;
 const DRAG_SPRING_CONFIG = {
   damping: 15,
   stiffness: 230,
@@ -53,6 +58,11 @@ const TAP_PULSE_CONFIG = {
   damping: 14,
   stiffness: 250,
   mass: 0.7,
+} as const;
+const PRESS_GROW_CONFIG = {
+  damping: 17,
+  stiffness: 240,
+  mass: 0.72,
 } as const;
 
 function clamp(value: number, min: number, max: number) {
@@ -183,6 +193,7 @@ export function LiquidTabBar({ state, descriptors, navigation }: BottomTabBarPro
 
   const lensCenterX = useSharedValue(0);
   const dragProgress = useSharedValue(0);
+  const pressProgress = useSharedValue(0);
   const dragIndex = useSharedValue(state.index);
 
   useEffect(() => {
@@ -224,12 +235,16 @@ export function LiquidTabBar({ state, descriptors, navigation }: BottomTabBarPro
       }
     }
 
-    lensCenterX.value = nextCenter;
+    lensCenterX.value = withSpring(nextCenter, TRACKING_SPRING_CONFIG);
   };
 
   const triggerTapPulse = () => {
     dragProgress.value = withSequence(
       withSpring(0.36, TAP_PULSE_CONFIG),
+      withSpring(0, RELEASE_PROGRESS_CONFIG)
+    );
+    pressProgress.value = withSequence(
+      withSpring(0.44, TAP_PULSE_CONFIG),
       withSpring(0, RELEASE_PROGRESS_CONFIG)
     );
   };
@@ -260,6 +275,7 @@ export function LiquidTabBar({ state, descriptors, navigation }: BottomTabBarPro
         return;
       }
 
+      pressProgress.value = withSpring(1, PRESS_GROW_CONFIG);
       dragProgress.value = withSpring(1, DRAG_SPRING_CONFIG);
       updateLensForTouch(event.x, false);
       triggerMediumHaptic();
@@ -273,6 +289,7 @@ export function LiquidTabBar({ state, descriptors, navigation }: BottomTabBarPro
       }
 
       const nextIndex = dragIndex.value;
+      pressProgress.value = withSpring(0, RELEASE_PROGRESS_CONFIG);
       dragProgress.value = withSpring(0, RELEASE_PROGRESS_CONFIG);
       lensCenterX.value = withSpring(getTabCenterX(nextIndex), SNAP_SPRING_CONFIG);
       navigateToIndex(nextIndex);
@@ -280,27 +297,28 @@ export function LiquidTabBar({ state, descriptors, navigation }: BottomTabBarPro
 
   const gesture = Gesture.Race(panGesture, tapGesture);
 
-  const pillStyle = useAnimatedStyle(() => ({
-    width: pillWidth,
-    opacity: 0.98 + dragProgress.value * 0.02,
-    transform: [
-      { translateX: lensCenterX.value - pillWidth / 2 },
-      {
-        scaleX: interpolate(
-          getStretchProgress(lensCenterX.value, itemWidth) * dragProgress.value,
-          [0, 1],
-          [1, MAX_STRETCH_SCALE]
-        ),
-      },
-      {
-        scaleY: interpolate(
-          getStretchProgress(lensCenterX.value, itemWidth) * dragProgress.value,
-          [0, 1],
-          [1, 0.92]
-        ),
-      },
-    ],
-  }));
+  const pillStyle = useAnimatedStyle(() => {
+    const stretch = getStretchProgress(lensCenterX.value, itemWidth) * dragProgress.value;
+    const pressLift = pressProgress.value;
+
+    return {
+      width: pillWidth,
+      opacity: 0.98 + dragProgress.value * 0.02,
+      transform: [
+        { translateX: lensCenterX.value - pillWidth / 2 },
+        {
+          scaleX:
+            interpolate(pressLift, [0, 1], [1, 1.1]) *
+            interpolate(stretch, [0, 1], [1, MAX_STRETCH_SCALE]),
+        },
+        {
+          scaleY:
+            interpolate(pressLift, [0, 1], [1, 1.08]) *
+            interpolate(stretch, [0, 1], [1, 0.94]),
+        },
+      ],
+    };
+  });
 
   const chromaLeftStyle = useAnimatedStyle(() => {
     const stretch = getStretchProgress(lensCenterX.value, itemWidth) * dragProgress.value;
@@ -324,8 +342,8 @@ export function LiquidTabBar({ state, descriptors, navigation }: BottomTabBarPro
     const stretch = getStretchProgress(lensCenterX.value, itemWidth) * dragProgress.value;
 
     return {
-      opacity: interpolate(dragProgress.value, [0, 0.36, 1], [0.92, 1, 1]),
-      transform: [{ scale: interpolate(stretch, [0, 1], [1, 1.015]) }],
+      opacity: interpolate(dragProgress.value + pressProgress.value, [0, 0.36, 1.4], [0.92, 1, 1]),
+      transform: [{ scale: interpolate(stretch + pressProgress.value * 0.25, [0, 1], [1, 1.035]) }],
     };
   });
 
@@ -333,18 +351,22 @@ export function LiquidTabBar({ state, descriptors, navigation }: BottomTabBarPro
     const stretch = getStretchProgress(lensCenterX.value, itemWidth) * dragProgress.value;
 
     return {
-      opacity: interpolate(dragProgress.value, [0, 0.36, 1], [0.94, 1, 1]),
-      transform: [{ scale: interpolate(stretch, [0, 1], [1, 1.01]) }],
+      opacity: interpolate(dragProgress.value + pressProgress.value, [0, 0.36, 1.4], [0.9, 0.98, 1]),
+      transform: [{ scale: interpolate(stretch + pressProgress.value * 0.2, [0, 1], [1, 1.02]) }],
     };
   });
 
   const shineStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(dragProgress.value, [0, 0.36, 1], [isIOS ? 0.82 : 0.42, isIOS ? 0.94 : 0.54, 1]),
-    transform: [{ scaleX: interpolate(dragProgress.value, [0, 1], [1, 1.06]) }],
+    opacity: interpolate(
+      dragProgress.value + pressProgress.value,
+      [0, 0.36, 1.4],
+      [isIOS ? 0.8 : 0.42, isIOS ? 0.94 : 0.56, 1]
+    ),
+    transform: [{ scaleX: interpolate(dragProgress.value + pressProgress.value, [0, 1.4], [1, 1.14]) }],
   }));
 
   const innerShadowStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(dragProgress.value, [0, 0.36, 1], [0.9, 0.82, 0.72]),
+    opacity: interpolate(dragProgress.value + pressProgress.value, [0, 0.36, 1.4], [0.92, 0.82, 0.68]),
   }));
 
   return (
